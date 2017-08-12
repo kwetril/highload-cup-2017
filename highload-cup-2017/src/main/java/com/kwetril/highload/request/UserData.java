@@ -1,8 +1,5 @@
 package com.kwetril.highload.request;
 
-/**
- * Created by a.klimovich on 12.08.2017.
- */
 public class UserData {
     public int userId;
     public long birthDate;
