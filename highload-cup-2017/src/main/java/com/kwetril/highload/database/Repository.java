@@ -2,6 +2,7 @@ package com.kwetril.highload.database;
 
 import com.kwetril.highload.request.LocationData;
 import com.kwetril.highload.request.UserData;
+import com.kwetril.highload.request.VisitData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,6 +16,10 @@ public class Repository {
     private static final ArrayList<LocationData> locationCollection = new ArrayList<>();
     private static final HashMap<Integer, Integer> locationIdToIdx = new HashMap<>();
     private static final AtomicInteger nextLocationIdx = new AtomicInteger(0);
+
+    private static final ArrayList<VisitData> visitCollection = new ArrayList<>();
+    private static final HashMap<Integer, Integer> visitIdToIdx = new HashMap<>();
+    private static final AtomicInteger nextVisitIdx = new AtomicInteger(0);
 
     public static void addUser(UserData user) {
         int currentIdx = nextUserIdx.getAndAdd(1);
@@ -94,6 +99,47 @@ public class Repository {
             }
             if (update.distance != 0) {
                 location.distance = update.distance;
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static void addVisit(VisitData visit) {
+        int currentIdx = nextVisitIdx.getAndAdd(1);
+        visitIdToIdx.put(visit.visitId, currentIdx);
+        visitCollection.add(visit);
+    }
+
+    public static String getVisit(int visitId) {
+        Integer index = visitIdToIdx.get(visitId);
+        if (index != null) {
+            return visitCollection.get(index).toString();
+        } else {
+            return null;
+        }
+    }
+
+    public static int countVisits() {
+        return nextVisitIdx.get();
+    }
+
+    public static boolean editVisit(VisitData update) {
+        Integer index = visitIdToIdx.get(update.visitId);
+        if (index != null) {
+            VisitData visit = visitCollection.get(index);
+            if (update.userId != 0) {
+                visit.userId = update.userId;
+            }
+            if (update.locationId != 0) {
+                visit.locationId = update.locationId;
+            }
+            if (update.mark != 0) {
+                visit.mark = update.mark;
+            }
+            if (update.visitedAt != 0) {
+                visit.visitedAt = update.visitedAt;
             }
             return true;
         } else {

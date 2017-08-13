@@ -2,6 +2,7 @@ package com.kwetril.highload.parsing;
 
 import com.kwetril.highload.request.LocationData;
 import com.kwetril.highload.request.UserData;
+import com.kwetril.highload.request.VisitData;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,6 +23,14 @@ public class RequestParser {
             "|(\"city\"\\s*:\\s*\"(?<city>\\p{L}+)\"\\s*,?)" +
             "|(\"distance\"\\s*:\\s*(?<distance>\\d+)\\s*,?)" +
             "|(\"place\"\\s*:\\s*\"(?<place>\\p{L}+)\"\\s*,?)" +
+            ")\\s*){1,5}\\}\\s*$");
+
+    static Pattern visitPattern = Pattern.compile("^\\s*\\{(\\s*(" +
+            "(\"id\"\\s*:\\s*(?<id>\\d+)\\s*,?)" +
+            "|(\"user\"\\s*:\\s*(?<user>\\d+)\\s*,?)" +
+            "|(\"location\"\\s*:\\s*(?<location>\\d+)\\s*,?)" +
+            "|(\"mark\"\\s*:\\s*(?<mark>\\d)\\s*,?)" +
+            "|(\"visited_at\"\\s*:\\s*(?<visitedat>\\d+)\\s*,?)" +
             ")\\s*){1,5}\\}\\s*$");
 
     public static UserData parseNewUser(String userJson) {
@@ -134,5 +143,56 @@ public class RequestParser {
         }
     }
 
+    public static VisitData parseNewVisit(String visitJson) {
+        try {
+            Matcher matcher = visitPattern.matcher(visitJson);
+            if (!matcher.matches()) {
+                return null;
+            } else if (matcher.group("id") == null || matcher.group("user") == null
+                    || matcher.group("location") == null || matcher.group("mark") == null
+                    || matcher.group("visitedat") == null) {
+                return null;
+            } else {
+                VisitData result = new VisitData();
+                result.visitId = Integer.parseInt(matcher.group("id"));
+                result.userId = Integer.parseInt(matcher.group("user"));
+                result.locationId = Integer.parseInt(matcher.group("location"));
+                result.mark = Integer.parseInt(matcher.group("mark"));
+                result.visitedAt = Integer.parseInt(matcher.group("visitedat"));
+                return result;
+            }
+        }
+        catch (Exception e) {
+            return null;
+        }
+    }
 
+    public static VisitData parseEditVisit(String visitJson) {
+        try {
+            Matcher matcher = locationPattern.matcher(visitJson);
+            if (!matcher.matches()) {
+                return null;
+            } else if (matcher.group("id") != null) {
+                return null;
+            } else {
+                VisitData result = new VisitData();
+                if (matcher.group("user") != null) {
+                    result.userId = Integer.parseInt(matcher.group("user"));
+                }
+                if (matcher.group("location") != null) {
+                    result.locationId = Integer.parseInt(matcher.group("location"));
+                }
+                if (matcher.group("mark") != null) {
+                    result.mark = Integer.parseInt(matcher.group("mark"));
+                }
+                if (matcher.group("visitedat") != null) {
+                    result.visitedAt = Integer.parseInt(matcher.group("visitedat"));
+                }
+                return result;
+            }
+        }
+        catch (Exception e) {
+            return null;
+        }
+    }
 }

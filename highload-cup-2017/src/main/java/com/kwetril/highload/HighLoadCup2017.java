@@ -4,6 +4,7 @@ import com.kwetril.highload.database.Repository;
 import com.kwetril.highload.parsing.RequestParser;
 import com.kwetril.highload.request.LocationData;
 import com.kwetril.highload.request.UserData;
+import com.kwetril.highload.request.VisitData;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.http.server.ServerConfiguration;
@@ -66,6 +67,21 @@ public class HighLoadCup2017 {
                         }
                         System.out.println(String.format("Locations added: %s", Repository.countLocations()));
                         break;
+                    case "visits":
+                        JSONObject visitsObject = new JSONObject(content);
+                        JSONArray visits = visitsObject.getJSONArray("visits");
+                        for (int i = 0; i < visits.length(); i++) {
+                            JSONObject jsonObject = visits.getJSONObject(i);
+                            String visitJson = jsonObject.toString();
+                            VisitData visit = RequestParser.parseNewVisit(visitJson);
+                            if (visit != null) {
+                                Repository.addVisit(visit);
+                            } else {
+                                throw new Exception(String.format("Couldn't parse %s", visitJson));
+                            }
+                        }
+                        System.out.println(String.format("Visists added: %s", Repository.countVisits()));
+                        break;
                 }
             }
         }
@@ -89,7 +105,6 @@ public class HighLoadCup2017 {
     }
 
     public static void main(String[] args) throws Exception {
-        System.out.println("Hello world");
         initDb();
         final HttpServer server = initServer();
         try {
