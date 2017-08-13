@@ -31,7 +31,7 @@ public class UserResource {
     @Produces({MediaType.APPLICATION_JSON})
     public Response editUser(@PathParam("userId") int userId, String data) {
         System.out.println(String.format("edit user %s with data %s", userId, data));
-        UserData update = RequestParser.parseEditUser(data);
+        UserUpdate update = RequestParser.parseEditUser(data);
         update.userId = userId;
         boolean isUpdated = Repository.editUser(update);
         if (isUpdated) {

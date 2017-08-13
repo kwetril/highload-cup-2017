@@ -1,8 +1,6 @@
 package com.kwetril.highload.parsing;
 
-import com.kwetril.highload.request.LocationData;
-import com.kwetril.highload.request.UserData;
-import com.kwetril.highload.request.VisitData;
+import com.kwetril.highload.request.*;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -58,7 +56,7 @@ public class RequestParser {
         }
     }
 
-    public static UserData parseEditUser(String userJson) {
+    public static UserUpdate parseEditUser(String userJson) {
         try {
             Matcher matcher = userPattern.matcher(userJson);
             if (!matcher.matches()) {
@@ -66,7 +64,7 @@ public class RequestParser {
             } else if (matcher.group("id") != null) {
                 return null;
             } else {
-                UserData result = new UserData();
+                UserUpdate result = new UserUpdate();
                 if (matcher.group("fname") != null) {
                     result.firstName = matcher.group("fname");
                 }
@@ -81,6 +79,7 @@ public class RequestParser {
                 }
                 if (matcher.group("bdate") != null) {
                     result.birthDate = Long.parseLong(matcher.group("bdate"));
+                    result.isBirthDateUpdated = true;
                 }
                 return result;
             }
@@ -114,7 +113,7 @@ public class RequestParser {
         }
     }
 
-    public static LocationData parseEditLocation(String locationJson) {
+    public static LocationUpdate parseEditLocation(String locationJson) {
         try {
             Matcher matcher = locationPattern.matcher(locationJson);
             if (!matcher.matches()) {
@@ -122,7 +121,7 @@ public class RequestParser {
             } else if (matcher.group("id") != null) {
                 return null;
             } else {
-                LocationData result = new LocationData();
+                LocationUpdate result = new LocationUpdate();
                 if (matcher.group("country") != null) {
                     result.country = matcher.group("country");
                 }
@@ -134,6 +133,7 @@ public class RequestParser {
                 }
                 if (matcher.group("distance") != null) {
                     result.distance = Integer.parseInt(matcher.group("distance"));
+                    result.isDistanceUpdated = true;
                 }
                 return result;
             }
@@ -167,7 +167,7 @@ public class RequestParser {
         }
     }
 
-    public static VisitData parseEditVisit(String visitJson) {
+    public static VisitUpdate parseEditVisit(String visitJson) {
         try {
             Matcher matcher = locationPattern.matcher(visitJson);
             if (!matcher.matches()) {
@@ -175,18 +175,22 @@ public class RequestParser {
             } else if (matcher.group("id") != null) {
                 return null;
             } else {
-                VisitData result = new VisitData();
+                VisitUpdate result = new VisitUpdate();
                 if (matcher.group("user") != null) {
                     result.userId = Integer.parseInt(matcher.group("user"));
+                    result.isUserUpdated = true;
                 }
                 if (matcher.group("location") != null) {
                     result.locationId = Integer.parseInt(matcher.group("location"));
+                    result.isLocationUpdated = true;
                 }
                 if (matcher.group("mark") != null) {
                     result.mark = Integer.parseInt(matcher.group("mark"));
+                    result.isMarkUpdated = true;
                 }
                 if (matcher.group("visitedat") != null) {
                     result.visitedAt = Integer.parseInt(matcher.group("visitedat"));
+                    result.isVisitedAtUpdated = true;
                 }
                 return result;
             }

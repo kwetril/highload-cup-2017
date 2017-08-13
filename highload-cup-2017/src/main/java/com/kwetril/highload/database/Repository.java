@@ -1,8 +1,6 @@
 package com.kwetril.highload.database;
 
-import com.kwetril.highload.request.LocationData;
-import com.kwetril.highload.request.UserData;
-import com.kwetril.highload.request.VisitData;
+import com.kwetril.highload.request.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,7 +38,7 @@ public class Repository {
         return nextUserIdx.get();
     }
 
-    public static boolean editUser(UserData update) {
+    public static boolean editUser(UserUpdate update) {
         Integer index = userIdToIdx.get(update.userId);
         if (index != null) {
             UserData user = userCollection.get(index);
@@ -56,7 +54,7 @@ public class Repository {
             if (update.email != null) {
                 user.email = update.email;
             }
-            if (update.birthDate != 0) {
+            if (update.isBirthDateUpdated) {
                 user.birthDate = update.birthDate;
             }
             return true;
@@ -84,7 +82,7 @@ public class Repository {
         return nextLocationIdx.get();
     }
 
-    public static boolean editLocation(LocationData update) {
+    public static boolean editLocation(LocationUpdate update) {
         Integer index = locationIdToIdx.get(update.locationId);
         if (index != null) {
             LocationData location = locationCollection.get(index);
@@ -97,7 +95,7 @@ public class Repository {
             if (update.place != null) {
                 location.place = update.place;
             }
-            if (update.distance != 0) {
+            if (update.isDistanceUpdated) {
                 location.distance = update.distance;
             }
             return true;
@@ -125,20 +123,20 @@ public class Repository {
         return nextVisitIdx.get();
     }
 
-    public static boolean editVisit(VisitData update) {
+    public static boolean editVisit(VisitUpdate update) {
         Integer index = visitIdToIdx.get(update.visitId);
         if (index != null) {
             VisitData visit = visitCollection.get(index);
-            if (update.userId != 0) {
+            if (update.isUserUpdated) {
                 visit.userId = update.userId;
             }
-            if (update.locationId != 0) {
+            if (update.isLocationUpdated) {
                 visit.locationId = update.locationId;
             }
-            if (update.mark != 0) {
+            if (update.isMarkUpdated) {
                 visit.mark = update.mark;
             }
-            if (update.visitedAt != 0) {
+            if (update.isVisitedAtUpdated) {
                 visit.visitedAt = update.visitedAt;
             }
             return true;

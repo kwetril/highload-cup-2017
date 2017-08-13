@@ -7,31 +7,31 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Path("location")
-public class LocationResource {
-    public LocationResource() {
+@Path("visit")
+public class VisitResource {
+    public VisitResource() {
     }
 
     @GET
-    @Path("{locationId}")
+    @Path("{visitId}")
     @Produces({MediaType.APPLICATION_JSON})
-    public Response getLocation(@PathParam("locationId") int locationId) {
-        String location = Repository.getLocation(locationId);
-        if (location != null) {
-            return Response.status(200).entity(location).build();
+    public Response getVisit(@PathParam("visitId") int visitId) {
+        String visit = Repository.getVisit(visitId);
+        if (visit != null) {
+            return Response.status(200).entity(visit).build();
         } else {
             return Response.status(404).entity("{}").build();
         }
     }
 
     @POST
-    @Path("{locationId}")
+    @Path("{visitId}")
     @Consumes(MediaType.WILDCARD)
     @Produces({MediaType.APPLICATION_JSON})
-    public Response editLocation(@PathParam("locationId") int locationId, String data) {
-        LocationUpdate update = RequestParser.parseEditLocation(data);
-        update.locationId = locationId;
-        boolean isUpdated = Repository.editLocation(update);
+    public Response editVisit(@PathParam("visitId") int visitId, String data) {
+        VisitUpdate update = RequestParser.parseEditVisit(data);
+        update.visitId = visitId;
+        boolean isUpdated = Repository.editVisit(update);
         if (isUpdated) {
             return Response.status(200).build();
         } else {
@@ -43,10 +43,10 @@ public class LocationResource {
     @Path("new")
     @Consumes(MediaType.WILDCARD)
     @Produces({MediaType.APPLICATION_JSON})
-    public Response addLocation(String data) {
-        LocationData location = RequestParser.parseNewLocation(data);
-        if (location != null) {
-            Repository.addLocation(location);
+    public Response addVisit(String data) {
+        VisitData visit = RequestParser.parseNewVisit(data);
+        if (visit != null) {
+            Repository.addVisit(visit);
             return Response.status(200).build();
         } else {
             return Response.status(404).build();
