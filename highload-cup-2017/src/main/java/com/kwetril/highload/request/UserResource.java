@@ -3,11 +3,7 @@ package com.kwetril.highload.request;
 import com.kwetril.highload.database.Repository;
 import com.kwetril.highload.parsing.RequestParser;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.ws.rs.*;
-import javax.ws.rs.container.ContainerResponseContext;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 

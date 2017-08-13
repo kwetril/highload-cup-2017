@@ -10,8 +10,7 @@ public class UserData {
 
     @Override
     public String toString() {
-        return String.format("{\"id\":%s,\"email\":\"%s\",\"first_name\":%s,\"last_name\":\"%s\",\"gender\":\"%s\",\"birth_date\":%s}",
+        return String.format("{\"id\":%s,\"email\":\"%s\",\"first_name\":\"%s\",\"last_name\":\"%s\",\"gender\":\"%s\",\"birth_date\":%s}",
                 userId, email, firstName, lastName, gender, birthDate);
-
     }
 }
