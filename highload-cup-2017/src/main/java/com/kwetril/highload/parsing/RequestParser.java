@@ -1,5 +1,6 @@
 package com.kwetril.highload.parsing;
 
+import com.kwetril.highload.request.LocationData;
 import com.kwetril.highload.request.UserData;
 
 import java.util.regex.Matcher;
@@ -14,6 +15,14 @@ public class RequestParser {
             "|(\"gender\"\\s*:\\s*\"(?<gender>(m|f))\"\\s*,?)" +
             "|(\"email\"\\s*:\\s*\"(?<email>[\\w@\\.-]+)\"\\s*,?)" +
             ")\\s*){1,6}\\}\\s*$");
+
+    static Pattern locationPattern = Pattern.compile("^\\s*\\{(\\s*(" +
+            "(\"id\"\\s*:\\s*(?<id>\\d+)\\s*,?)" +
+            "|(\"country\"\\s*:\\s*\"(?<country>[\\p{L} -]+)\"\\s*,?)" +
+            "|(\"city\"\\s*:\\s*\"(?<city>\\p{L}+)\"\\s*,?)" +
+            "|(\"distance\"\\s*:\\s*(?<distance>\\d+)\\s*,?)" +
+            "|(\"place\"\\s*:\\s*\"(?<place>\\p{L}+)\"\\s*,?)" +
+            ")\\s*){1,5}\\}\\s*$");
 
     public static UserData parseNewUser(String userJson) {
         try {
@@ -71,4 +80,59 @@ public class RequestParser {
             return null;
         }
     }
+
+    public static LocationData parseNewLocation(String locationJson) {
+        try {
+            Matcher matcher = locationPattern.matcher(locationJson);
+            if (!matcher.matches()) {
+                return null;
+            } else if (matcher.group("id") == null || matcher.group("distance") == null
+                    || matcher.group("country") == null || matcher.group("city") == null
+                    || matcher.group("place") == null) {
+                return null;
+            } else {
+                LocationData result = new LocationData();
+                result.locationId = Integer.parseInt(matcher.group("id"));
+                result.country = matcher.group("country");
+                result.city = matcher.group("city");
+                result.place = matcher.group("place");
+                result.distance = Integer.parseInt(matcher.group("distance"));
+                return result;
+            }
+        }
+        catch (Exception e) {
+            return null;
+        }
+    }
+
+    public static LocationData parseEditLocation(String locationJson) {
+        try {
+            Matcher matcher = locationPattern.matcher(locationJson);
+            if (!matcher.matches()) {
+                return null;
+            } else if (matcher.group("id") != null) {
+                return null;
+            } else {
+                LocationData result = new LocationData();
+                if (matcher.group("country") != null) {
+                    result.country = matcher.group("country");
+                }
+                if (matcher.group("city") != null) {
+                    result.city = matcher.group("city");
+                }
+                if (matcher.group("place") != null) {
+                    result.place = matcher.group("place");
+                }
+                if (matcher.group("distance") != null) {
+                    result.distance = Integer.parseInt(matcher.group("distance"));
+                }
+                return result;
+            }
+        }
+        catch (Exception e) {
+            return null;
+        }
+    }
+
+
 }
