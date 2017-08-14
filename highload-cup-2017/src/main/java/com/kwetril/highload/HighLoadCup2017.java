@@ -1,6 +1,6 @@
 package com.kwetril.highload;
 
-import com.kwetril.highload.database.Repository;
+import com.kwetril.highload.database.RepositoryProvider;
 import com.kwetril.highload.parsing.RequestParser;
 import com.kwetril.highload.request.LocationData;
 import com.kwetril.highload.request.UserData;
@@ -45,12 +45,12 @@ public class HighLoadCup2017 {
                             String userJson = jsonObject.toString();
                             UserData user = RequestParser.parseNewUser(userJson);
                             if (user != null) {
-                                Repository.addUser(user);
+                                RepositoryProvider.addUser(user);
                             } else {
                                 throw new Exception(String.format("Couldn't parse %s", userJson));
                             }
                         }
-                        System.out.println(String.format("Users added: %s", Repository.countUsers()));
+                        System.out.println(String.format("Users added: %s", RepositoryProvider.countUsers()));
                         break;
                     case "locations":
                         JSONObject locationsObject = new JSONObject(content);
@@ -60,12 +60,12 @@ public class HighLoadCup2017 {
                             String locationJson = jsonObject.toString();
                             LocationData location = RequestParser.parseNewLocation(locationJson);
                             if (location != null) {
-                                Repository.addLocation(location);
+                                RepositoryProvider.addLocation(location);
                             } else {
                                 throw new Exception(String.format("Couldn't parse %s", locationJson));
                             }
                         }
-                        System.out.println(String.format("Locations added: %s", Repository.countLocations()));
+                        System.out.println(String.format("Locations added: %s", RepositoryProvider.countLocations()));
                         break;
                     case "visits":
                         JSONObject visitsObject = new JSONObject(content);
@@ -75,12 +75,12 @@ public class HighLoadCup2017 {
                             String visitJson = jsonObject.toString();
                             VisitData visit = RequestParser.parseNewVisit(visitJson);
                             if (visit != null) {
-                                Repository.addVisit(visit);
+                                RepositoryProvider.addVisit(visit);
                             } else {
                                 throw new Exception(String.format("Couldn't parse %s", visitJson));
                             }
                         }
-                        System.out.println(String.format("Visists added: %s", Repository.countVisits()));
+                        System.out.println(String.format("Visists added: %s", RepositoryProvider.countVisits()));
                         break;
                 }
             }

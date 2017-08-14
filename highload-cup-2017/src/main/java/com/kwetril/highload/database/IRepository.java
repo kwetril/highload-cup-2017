@@ -3,7 +3,7 @@ package com.kwetril.highload.database;
 import com.kwetril.highload.request.*;
 
 public interface IRepository {
-    void addUser(UserData user);
+    boolean addUser(UserData user);
 
     String getUser(int userId);
 
@@ -11,7 +11,7 @@ public interface IRepository {
 
     boolean editUser(UserUpdate update);
 
-    void addLocation(LocationData location);
+    boolean addLocation(LocationData location);
 
     String getLocation(int locationId);
 
@@ -19,7 +19,7 @@ public interface IRepository {
 
     boolean editLocation(LocationUpdate update);
 
-    void addVisit(VisitData visit);
+    boolean addVisit(VisitData visit);
 
     String getVisit(int visitId);
 

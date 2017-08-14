@@ -2,144 +2,157 @@ package com.kwetril.highload.database;
 
 import com.kwetril.highload.request.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ConcurrentHashMapRepo implements IRepository {
-    private final ArrayList<UserData> userCollection = new ArrayList<>(1000000);
-    private final HashMap<Integer, Integer> userIdToIdx = new HashMap<>();
-    private final AtomicInteger nextUserIdx = new AtomicInteger(0);
+    private final ConcurrentHashMap<Integer, UserData> userCollection = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, LocationData> locationCollection = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, VisitData> visitCollection = new ConcurrentHashMap<>();
 
-    private final ArrayList<LocationData> locationCollection = new ArrayList<>(1000000);
-    private final HashMap<Integer, Integer> locationIdToIdx = new HashMap<>();
-    private final AtomicInteger nextLocationIdx = new AtomicInteger(0);
-
-    private final ArrayList<VisitData> visitCollection = new ArrayList<>(10000000);
-    private final HashMap<Integer, Integer> visitIdToIdx = new HashMap<>();
-    private final AtomicInteger nextVisitIdx = new AtomicInteger(0);
-
-    public void addUser(UserData user) {
-        int currentIdx = nextUserIdx.getAndAdd(1);
-        userCollection.add(user);
-        userCollection.set(currentIdx, user);
-        userIdToIdx.put(user.userId, currentIdx);
+    public boolean addUser(UserData user) {
+        UserData existingUser = userCollection.get(user.userId);
+        if (existingUser == null) {
+            UserData oldValue = userCollection.putIfAbsent(user.userId, user);
+            if (oldValue == null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public String getUser(int userId) {
-        Integer index = userIdToIdx.get(userId);
-        if (index != null) {
-            return userCollection.get(index).toString();
+        UserData user = userCollection.get(userId);
+        if (user != null) {
+            return user.toString();
         } else {
             return null;
         }
     }
 
     public int countUsers() {
-        return nextUserIdx.get();
+        return userCollection.size();
     }
 
     public boolean editUser(UserUpdate update) {
-        Integer index = userIdToIdx.get(update.userId);
-        if (index != null) {
-            UserData user = userCollection.get(index);
-            if (update.firstName != null) {
-                user.firstName = update.firstName;
-            }
-            if (update.lastName != null) {
-                user.lastName = update.lastName;
-            }
-            if (update.gender != null) {
-                user.gender = update.gender;
-            }
-            if (update.email != null) {
-                user.email = update.email;
-            }
-            if (update.isBirthDateUpdated) {
-                user.birthDate = update.birthDate;
-            }
+        UserData user = userCollection.get(update.userId);
+        if (user != null) {
+            userCollection.merge(update.userId, update, (oldRecord, newRec) -> {
+                UserUpdate newRecord = (UserUpdate) newRec;
+                if (newRecord.firstName != null) {
+                    oldRecord.firstName = newRecord.firstName;
+                }
+                if (newRecord.lastName != null) {
+                    oldRecord.lastName = newRecord.lastName;
+                }
+                if (newRecord.gender != null) {
+                    oldRecord.gender = newRecord.gender;
+                }
+                if (newRecord.email != null) {
+                    oldRecord.email = newRecord.email;
+                }
+                if (newRecord.isBirthDateUpdated) {
+                    oldRecord.birthDate = newRecord.birthDate;
+                }
+                return oldRecord;
+            });
             return true;
         } else {
             return false;
         }
     }
 
-    public void addLocation(LocationData location) {
-        int currentIdx = nextLocationIdx.getAndAdd(1);
-        locationIdToIdx.put(location.locationId, currentIdx);
-        locationCollection.add(location);
+    public boolean addLocation(LocationData location) {
+        LocationData existingLocation = locationCollection.get(location.locationId);
+        if (existingLocation == null) {
+            LocationData oldValue = locationCollection.putIfAbsent(location.locationId, location);
+            if (oldValue == null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public String getLocation(int locationId) {
-        Integer index = locationIdToIdx.get(locationId);
-        if (index != null) {
-            return locationCollection.get(index).toString();
+        LocationData location = locationCollection.get(locationId);
+        if (location != null) {
+            return location.toString();
         } else {
             return null;
         }
     }
 
     public int countLocations() {
-        return nextLocationIdx.get();
+        return locationCollection.size();
     }
 
     public boolean editLocation(LocationUpdate update) {
-        Integer index = locationIdToIdx.get(update.locationId);
-        if (index != null) {
-            LocationData location = locationCollection.get(index);
-            if (update.country != null) {
-                location.country = update.country;
-            }
-            if (update.city != null) {
-                location.city = update.city;
-            }
-            if (update.place != null) {
-                location.place = update.place;
-            }
-            if (update.isDistanceUpdated) {
-                location.distance = update.distance;
-            }
+        LocationData location = locationCollection.get(update.locationId);
+        if (location != null) {
+            locationCollection.merge(update.locationId, update, (oldRecord, newRec) -> {
+                LocationUpdate newRecord = (LocationUpdate) newRec;
+                if (newRecord.country != null) {
+                    oldRecord.country = newRecord.country;
+                }
+                if (newRecord.city != null) {
+                    oldRecord.city = newRecord.city;
+                }
+                if (newRecord.place != null) {
+                    oldRecord.place = newRecord.place;
+                }
+                if (newRecord.isDistanceUpdated) {
+                    oldRecord.distance = newRecord.distance;
+                }
+                return oldRecord;
+            });
             return true;
         } else {
             return false;
         }
     }
 
-    public void addVisit(VisitData visit) {
-        int currentIdx = nextVisitIdx.getAndAdd(1);
-        visitIdToIdx.put(visit.visitId, currentIdx);
-        visitCollection.add(visit);
+    public boolean addVisit(VisitData visit) {
+        VisitData existingVisit = visitCollection.get(visit.userId);
+        if (existingVisit == null) {
+            VisitData oldValue = visitCollection.putIfAbsent(visit.visitId, visit);
+            if (oldValue == null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public String getVisit(int visitId) {
-        Integer index = visitIdToIdx.get(visitId);
-        if (index != null) {
-            return visitCollection.get(index).toString();
+        VisitData visit = visitCollection.get(visitId);
+        if (visit != null) {
+            return visit.toString();
         } else {
             return null;
         }
     }
 
     public int countVisits() {
-        return nextVisitIdx.get();
+        return visitCollection.size();
     }
 
     public boolean editVisit(VisitUpdate update) {
-        Integer index = visitIdToIdx.get(update.visitId);
-        if (index != null) {
-            VisitData visit = visitCollection.get(index);
-            if (update.isUserUpdated) {
-                visit.userId = update.userId;
-            }
-            if (update.isLocationUpdated) {
-                visit.locationId = update.locationId;
-            }
-            if (update.isMarkUpdated) {
-                visit.mark = update.mark;
-            }
-            if (update.isVisitedAtUpdated) {
-                visit.visitedAt = update.visitedAt;
-            }
+        VisitData visit = visitCollection.get(update.visitId);
+        if (visit != null) {
+            visitCollection.merge(update.visitId, update, (oldRecord, newRec) -> {
+                VisitUpdate newRecord = (VisitUpdate) newRec;
+                if (newRecord.isUserUpdated) {
+                    oldRecord.userId = newRecord.userId;
+                }
+                if (newRecord.isLocationUpdated) {
+                    oldRecord.locationId = newRecord.locationId;
+                }
+                if (newRecord.isMarkUpdated) {
+                    oldRecord.mark = newRecord.mark;
+                }
+                if (newRecord.isVisitedAtUpdated) {
+                    oldRecord.visitedAt = newRecord.visitedAt;
+                }
+                return oldRecord;
+            });
             return true;
         } else {
             return false;
