@@ -1,6 +1,6 @@
 package com.kwetril.highload.request;
 
-import com.kwetril.highload.database.Repository;
+import com.kwetril.highload.database.RepositoryProvider;
 import com.kwetril.highload.parsing.RequestParser;
 
 import javax.ws.rs.*;
@@ -16,7 +16,7 @@ public class LocationResource {
     @Path("{locationId}")
     @Produces({MediaType.APPLICATION_JSON})
     public Response getLocation(@PathParam("locationId") int locationId) {
-        String location = Repository.getLocation(locationId);
+        String location = RepositoryProvider.repo.getLocation(locationId);
         if (location != null) {
             return Response.status(200).entity(location).build();
         } else {
@@ -31,7 +31,7 @@ public class LocationResource {
     public Response editLocation(@PathParam("locationId") int locationId, String data) {
         LocationUpdate update = RequestParser.parseEditLocation(data);
         update.locationId = locationId;
-        boolean isUpdated = Repository.editLocation(update);
+        boolean isUpdated = RepositoryProvider.repo.editLocation(update);
         if (isUpdated) {
             return Response.status(200).build();
         } else {
@@ -46,7 +46,7 @@ public class LocationResource {
     public Response addLocation(String data) {
         LocationData location = RequestParser.parseNewLocation(data);
         if (location != null) {
-            Repository.addLocation(location);
+            RepositoryProvider.repo.addLocation(location);
             return Response.status(200).build();
         } else {
             return Response.status(404).build();

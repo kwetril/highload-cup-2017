@@ -1,6 +1,6 @@
 package com.kwetril.highload.request;
 
-import com.kwetril.highload.database.Repository;
+import com.kwetril.highload.database.RepositoryProvider;
 import com.kwetril.highload.parsing.RequestParser;
 
 import javax.ws.rs.*;
@@ -16,7 +16,7 @@ public class VisitResource {
     @Path("{visitId}")
     @Produces({MediaType.APPLICATION_JSON})
     public Response getVisit(@PathParam("visitId") int visitId) {
-        String visit = Repository.getVisit(visitId);
+        String visit = RepositoryProvider.repo.getVisit(visitId);
         if (visit != null) {
             return Response.status(200).entity(visit).build();
         } else {
@@ -31,7 +31,7 @@ public class VisitResource {
     public Response editVisit(@PathParam("visitId") int visitId, String data) {
         VisitUpdate update = RequestParser.parseEditVisit(data);
         update.visitId = visitId;
-        boolean isUpdated = Repository.editVisit(update);
+        boolean isUpdated = RepositoryProvider.repo.editVisit(update);
         if (isUpdated) {
             return Response.status(200).build();
         } else {
@@ -46,7 +46,7 @@ public class VisitResource {
     public Response addVisit(String data) {
         VisitData visit = RequestParser.parseNewVisit(data);
         if (visit != null) {
-            Repository.addVisit(visit);
+            RepositoryProvider.repo.addVisit(visit);
             return Response.status(200).build();
         } else {
             return Response.status(404).build();

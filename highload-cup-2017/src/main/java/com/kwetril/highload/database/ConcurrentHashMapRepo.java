@@ -6,26 +6,27 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class Repository {
-    private static final ArrayList<UserData> userCollection = new ArrayList<>();
-    private static final HashMap<Integer, Integer> userIdToIdx = new HashMap<>();
-    private static final AtomicInteger nextUserIdx = new AtomicInteger(0);
+public class ConcurrentHashMapRepo implements IRepository {
+    private final ArrayList<UserData> userCollection = new ArrayList<>(1000000);
+    private final HashMap<Integer, Integer> userIdToIdx = new HashMap<>();
+    private final AtomicInteger nextUserIdx = new AtomicInteger(0);
 
-    private static final ArrayList<LocationData> locationCollection = new ArrayList<>();
-    private static final HashMap<Integer, Integer> locationIdToIdx = new HashMap<>();
-    private static final AtomicInteger nextLocationIdx = new AtomicInteger(0);
+    private final ArrayList<LocationData> locationCollection = new ArrayList<>(1000000);
+    private final HashMap<Integer, Integer> locationIdToIdx = new HashMap<>();
+    private final AtomicInteger nextLocationIdx = new AtomicInteger(0);
 
-    private static final ArrayList<VisitData> visitCollection = new ArrayList<>();
-    private static final HashMap<Integer, Integer> visitIdToIdx = new HashMap<>();
-    private static final AtomicInteger nextVisitIdx = new AtomicInteger(0);
+    private final ArrayList<VisitData> visitCollection = new ArrayList<>(10000000);
+    private final HashMap<Integer, Integer> visitIdToIdx = new HashMap<>();
+    private final AtomicInteger nextVisitIdx = new AtomicInteger(0);
 
-    public static void addUser(UserData user) {
+    public void addUser(UserData user) {
         int currentIdx = nextUserIdx.getAndAdd(1);
-        userIdToIdx.put(user.userId, currentIdx);
         userCollection.add(user);
+        userCollection.set(currentIdx, user);
+        userIdToIdx.put(user.userId, currentIdx);
     }
 
-    public static String getUser(int userId) {
+    public String getUser(int userId) {
         Integer index = userIdToIdx.get(userId);
         if (index != null) {
             return userCollection.get(index).toString();
@@ -34,11 +35,11 @@ public class Repository {
         }
     }
 
-    public static int countUsers() {
+    public int countUsers() {
         return nextUserIdx.get();
     }
 
-    public static boolean editUser(UserUpdate update) {
+    public boolean editUser(UserUpdate update) {
         Integer index = userIdToIdx.get(update.userId);
         if (index != null) {
             UserData user = userCollection.get(index);
@@ -63,13 +64,13 @@ public class Repository {
         }
     }
 
-    public static void addLocation(LocationData location) {
+    public void addLocation(LocationData location) {
         int currentIdx = nextLocationIdx.getAndAdd(1);
         locationIdToIdx.put(location.locationId, currentIdx);
         locationCollection.add(location);
     }
 
-    public static String getLocation(int locationId) {
+    public String getLocation(int locationId) {
         Integer index = locationIdToIdx.get(locationId);
         if (index != null) {
             return locationCollection.get(index).toString();
@@ -78,11 +79,11 @@ public class Repository {
         }
     }
 
-    public static int countLocations() {
+    public int countLocations() {
         return nextLocationIdx.get();
     }
 
-    public static boolean editLocation(LocationUpdate update) {
+    public boolean editLocation(LocationUpdate update) {
         Integer index = locationIdToIdx.get(update.locationId);
         if (index != null) {
             LocationData location = locationCollection.get(index);
@@ -104,13 +105,13 @@ public class Repository {
         }
     }
 
-    public static void addVisit(VisitData visit) {
+    public void addVisit(VisitData visit) {
         int currentIdx = nextVisitIdx.getAndAdd(1);
         visitIdToIdx.put(visit.visitId, currentIdx);
         visitCollection.add(visit);
     }
 
-    public static String getVisit(int visitId) {
+    public String getVisit(int visitId) {
         Integer index = visitIdToIdx.get(visitId);
         if (index != null) {
             return visitCollection.get(index).toString();
@@ -119,11 +120,11 @@ public class Repository {
         }
     }
 
-    public static int countVisits() {
+    public int countVisits() {
         return nextVisitIdx.get();
     }
 
-    public static boolean editVisit(VisitUpdate update) {
+    public boolean editVisit(VisitUpdate update) {
         Integer index = visitIdToIdx.get(update.visitId);
         if (index != null) {
             VisitData visit = visitCollection.get(index);

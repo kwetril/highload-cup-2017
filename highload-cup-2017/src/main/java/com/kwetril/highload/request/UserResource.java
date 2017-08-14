@@ -1,6 +1,6 @@
 package com.kwetril.highload.request;
 
-import com.kwetril.highload.database.Repository;
+import com.kwetril.highload.database.RepositoryProvider;
 import com.kwetril.highload.parsing.RequestParser;
 
 import javax.ws.rs.*;
@@ -17,7 +17,7 @@ public class UserResource {
     @Produces({MediaType.APPLICATION_JSON})
     public Response getUser(@PathParam("userId") int userId) {
         //System.out.println(String.format("get user %s", userId));
-        String user = Repository.getUser(userId);
+        String user = RepositoryProvider.repo.getUser(userId);
         if (user != null) {
             return Response.status(200).entity(user).build();
         } else {
@@ -33,7 +33,7 @@ public class UserResource {
         System.out.println(String.format("edit user %s with data %s", userId, data));
         UserUpdate update = RequestParser.parseEditUser(data);
         update.userId = userId;
-        boolean isUpdated = Repository.editUser(update);
+        boolean isUpdated = RepositoryProvider.repo.editUser(update);
         if (isUpdated) {
             return Response.status(200).build();
         } else {
@@ -49,7 +49,7 @@ public class UserResource {
         System.out.println(String.format("add user with data %s", data));
         UserData user = RequestParser.parseNewUser(data);
         if (user != null) {
-            Repository.addUser(user);
+            RepositoryProvider.repo.addUser(user);
             return Response.status(200).build();
         } else {
             return Response.status(404).build();
