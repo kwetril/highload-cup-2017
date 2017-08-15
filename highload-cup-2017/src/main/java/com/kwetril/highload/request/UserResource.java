@@ -7,7 +7,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Path("user")
+@Path("users")
 public class UserResource {
     public UserResource() {
     }
@@ -17,9 +17,9 @@ public class UserResource {
     @Produces({MediaType.APPLICATION_JSON})
     public Response getUser(@PathParam("userId") int userId) {
         //System.out.println(String.format("get user %s", userId));
-        String user = RepositoryProvider.repo.getUser(userId);
+        UserData user = RepositoryProvider.repo.getUser(userId);
         if (user != null) {
-            return Response.status(200).entity(user).build();
+            return Response.status(200).entity(user.toString()).build();
         } else {
             return Response.status(404).entity("{}").build();
         }
@@ -53,6 +53,19 @@ public class UserResource {
             return Response.status(200).build();
         } else {
             return Response.status(404).build();
+        }
+    }
+
+    @GET
+    @Path("{userId}/visits")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response getUserVisits(@PathParam("userId") int userId) {
+        //System.out.println(String.format("get user %s", userId));
+        UserData user = RepositoryProvider.repo.getUser(userId);
+        if (user != null) {
+            return Response.status(200).entity(user.toString()).build();
+        } else {
+            return Response.status(404).entity("{}").build();
         }
     }
 }

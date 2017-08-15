@@ -5,7 +5,7 @@ import com.kwetril.highload.request.*;
 public interface IRepository {
     boolean addUser(UserData user);
 
-    String getUser(int userId);
+    UserData getUser(int userId);
 
     int countUsers();
 
@@ -13,7 +13,7 @@ public interface IRepository {
 
     boolean addLocation(LocationData location);
 
-    String getLocation(int locationId);
+    LocationData getLocation(int locationId);
 
     int countLocations();
 
@@ -21,9 +21,15 @@ public interface IRepository {
 
     boolean addVisit(VisitData visit);
 
-    String getVisit(int visitId);
+    VisitData getVisit(int visitId);
 
     int countVisits();
 
     boolean editVisit(VisitUpdate update);
+
+    Iterable<UserVisitData> getUserVisits(int userId,
+                                          boolean hasFromDate, long fromData,
+                                          boolean hasToDate, long toDate,
+                                          String country,
+                                          boolean hasDistance, int distance);
 }

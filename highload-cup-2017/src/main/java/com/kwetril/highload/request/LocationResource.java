@@ -7,7 +7,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Path("location")
+@Path("locations")
 public class LocationResource {
     public LocationResource() {
     }
@@ -16,9 +16,9 @@ public class LocationResource {
     @Path("{locationId}")
     @Produces({MediaType.APPLICATION_JSON})
     public Response getLocation(@PathParam("locationId") int locationId) {
-        String location = RepositoryProvider.repo.getLocation(locationId);
+        LocationData location = RepositoryProvider.repo.getLocation(locationId);
         if (location != null) {
-            return Response.status(200).entity(location).build();
+            return Response.status(200).entity(location.toString()).build();
         } else {
             return Response.status(404).entity("{}").build();
         }

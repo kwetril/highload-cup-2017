@@ -45,12 +45,12 @@ public class HighLoadCup2017 {
                             String userJson = jsonObject.toString();
                             UserData user = RequestParser.parseNewUser(userJson);
                             if (user != null) {
-                                RepositoryProvider.addUser(user);
+                                RepositoryProvider.repo.addUser(user);
                             } else {
                                 throw new Exception(String.format("Couldn't parse %s", userJson));
                             }
                         }
-                        System.out.println(String.format("Users added: %s", RepositoryProvider.countUsers()));
+                        System.out.println(String.format("Users added: %s", RepositoryProvider.repo.countUsers()));
                         break;
                     case "locations":
                         JSONObject locationsObject = new JSONObject(content);
@@ -60,12 +60,12 @@ public class HighLoadCup2017 {
                             String locationJson = jsonObject.toString();
                             LocationData location = RequestParser.parseNewLocation(locationJson);
                             if (location != null) {
-                                RepositoryProvider.addLocation(location);
+                                RepositoryProvider.repo.addLocation(location);
                             } else {
                                 throw new Exception(String.format("Couldn't parse %s", locationJson));
                             }
                         }
-                        System.out.println(String.format("Locations added: %s", RepositoryProvider.countLocations()));
+                        System.out.println(String.format("Locations added: %s", RepositoryProvider.repo.countLocations()));
                         break;
                     case "visits":
                         JSONObject visitsObject = new JSONObject(content);
@@ -75,12 +75,12 @@ public class HighLoadCup2017 {
                             String visitJson = jsonObject.toString();
                             VisitData visit = RequestParser.parseNewVisit(visitJson);
                             if (visit != null) {
-                                RepositoryProvider.addVisit(visit);
+                                RepositoryProvider.repo.addVisit(visit);
                             } else {
                                 throw new Exception(String.format("Couldn't parse %s", visitJson));
                             }
                         }
-                        System.out.println(String.format("Visists added: %s", RepositoryProvider.countVisits()));
+                        System.out.println(String.format("Visists added: %s", RepositoryProvider.repo.countVisits()));
                         break;
                 }
             }

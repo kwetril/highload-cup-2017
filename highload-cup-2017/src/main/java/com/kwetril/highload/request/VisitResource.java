@@ -7,7 +7,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Path("visit")
+@Path("visits")
 public class VisitResource {
     public VisitResource() {
     }
@@ -16,9 +16,9 @@ public class VisitResource {
     @Path("{visitId}")
     @Produces({MediaType.APPLICATION_JSON})
     public Response getVisit(@PathParam("visitId") int visitId) {
-        String visit = RepositoryProvider.repo.getVisit(visitId);
+        VisitData visit = RepositoryProvider.repo.getVisit(visitId);
         if (visit != null) {
-            return Response.status(200).entity(visit).build();
+            return Response.status(200).entity(visit.toString()).build();
         } else {
             return Response.status(404).entity("{}").build();
         }
