@@ -90,7 +90,7 @@ public class HighLoadCup2017 {
 
     private static HttpServer initServer() {
         HttpServer server = new HttpServer();
-        server.addListener(new NetworkListener("grizzly", "127.0.0.1", 8080));
+        server.addListener(new NetworkListener("grizzly", "127.0.0.1", 80));
 
         final TCPNIOTransportBuilder transportBuilder = TCPNIOTransportBuilder.newInstance();
         //transportBuilder.setIOStrategy(WorkerThreadIOStrategy.getInstance());
