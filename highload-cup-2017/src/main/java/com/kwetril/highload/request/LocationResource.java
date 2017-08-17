@@ -30,12 +30,15 @@ public class LocationResource {
     @Produces({MediaType.APPLICATION_JSON})
     public Response editLocation(@PathParam("locationId") int locationId, String data) {
         LocationUpdate update = RequestParser.parseEditLocation(data);
+        if (update == null) {
+            return Response.status(400).entity("{}").build();
+        }
         update.locationId = locationId;
         boolean isUpdated = RepositoryProvider.repo.editLocation(update);
         if (isUpdated) {
-            return Response.status(200).build();
+            return Response.status(200).entity("{}").build();
         } else {
-            return Response.status(404).build();
+            return Response.status(404).entity("{}").build();
         }
     }
 
@@ -47,9 +50,9 @@ public class LocationResource {
         LocationData location = RequestParser.parseNewLocation(data);
         if (location != null) {
             RepositoryProvider.repo.addLocation(location);
-            return Response.status(200).build();
+            return Response.status(200).entity("{}").build();
         } else {
-            return Response.status(404).build();
+            return Response.status(400).entity("{}").build();
         }
     }
 }

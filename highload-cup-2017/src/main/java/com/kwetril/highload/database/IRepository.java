@@ -2,10 +2,14 @@ package com.kwetril.highload.database;
 
 import com.kwetril.highload.request.*;
 
+import java.util.ArrayList;
+
 public interface IRepository {
     boolean addUser(UserData user);
 
     UserData getUser(int userId);
+
+    Iterable<Integer> getUserIds();
 
     int countUsers();
 
@@ -15,6 +19,8 @@ public interface IRepository {
 
     LocationData getLocation(int locationId);
 
+    Iterable<Integer> getLocationIds();
+
     int countLocations();
 
     boolean editLocation(LocationUpdate update);
@@ -23,13 +29,15 @@ public interface IRepository {
 
     VisitData getVisit(int visitId);
 
+    Iterable<Integer> getVisitIds();
+
     int countVisits();
 
     boolean editVisit(VisitUpdate update);
 
-    Iterable<UserVisitData> getUserVisits(int userId,
-                                          boolean hasFromDate, long fromData,
-                                          boolean hasToDate, long toDate,
-                                          String country,
-                                          boolean hasDistance, int distance);
+    ArrayList<UserVisitData> getUserVisits(int userId,
+                                           boolean hasFromDate, long fromData,
+                                           boolean hasToDate, long toDate,
+                                           String country,
+                                           boolean hasDistance, int distance);
 }

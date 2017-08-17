@@ -30,6 +30,10 @@ public class ConcurrentHashMapRepo implements IRepository {
         return userCollection.get(userId);
     }
 
+    public Iterable<Integer> getUserIds() {
+        return userCollection.keySet();
+    }
+
     public int countUsers() {
         return userCollection.size();
     }
@@ -77,6 +81,10 @@ public class ConcurrentHashMapRepo implements IRepository {
         return locationCollection.get(locationId);
     }
 
+    public Iterable<Integer> getLocationIds() {
+        return locationCollection.keySet();
+    }
+
     public int countLocations() {
         return locationCollection.size();
     }
@@ -108,7 +116,7 @@ public class ConcurrentHashMapRepo implements IRepository {
 
     public boolean addVisit(VisitData visit) {
         synchronized (visitUpdateLock) {
-            VisitData existingVisit = visitCollection.get(visit.userId);
+            VisitData existingVisit = visitCollection.get(visit.visitId);
             if (existingVisit == null) {
                 visitCollection.put(visit.visitId, visit);
                 if (getUser(visit.userId) != null && getLocation(visit.locationId) != null) {
@@ -134,6 +142,10 @@ public class ConcurrentHashMapRepo implements IRepository {
 
     public VisitData getVisit(int visitId) {
         return visitCollection.get(visitId);
+    }
+
+    public Iterable<Integer> getVisitIds() {
+        return visitCollection.keySet();
     }
 
     public int countVisits() {
@@ -167,7 +179,7 @@ public class ConcurrentHashMapRepo implements IRepository {
         }
     }
 
-    public Iterable<UserVisitData> getUserVisits(int userId, boolean hasFromDate, long fromData,
+    public ArrayList<UserVisitData> getUserVisits(int userId, boolean hasFromDate, long fromDate,
                                                  boolean hasToDate, long toDate, String country,
                                                  boolean hasDistance, int distance) {
         UserData user = getUser(userId);
@@ -179,8 +191,15 @@ public class ConcurrentHashMapRepo implements IRepository {
         if (userVisitsIds != null) {
             for (Integer visitId : userVisitsIds) {
                 VisitData visit = getVisit(visitId);
-                LocationData location = getLocation(visit.locationId);
-                boolean filteringCondition = true;
+                LocationData location = null;
+                boolean filteringCondition;
+                filteringCondition = (!hasFromDate || (fromDate < visit.visitedAt))
+                    && (!hasToDate || (visit.visitedAt < toDate));
+                if (filteringCondition) {
+                    location = getLocation(visit.locationId);
+                    filteringCondition = (!hasDistance || location.distance < distance)
+                            && (country == null || location.country.equals(country));
+                }
                 if (filteringCondition) {
                     UserVisitData userVisit = new UserVisitData();
                     userVisit.mark = visit.mark;

@@ -169,7 +169,7 @@ public class RequestParser {
 
     public static VisitUpdate parseEditVisit(String visitJson) {
         try {
-            Matcher matcher = locationPattern.matcher(visitJson);
+            Matcher matcher = visitPattern.matcher(visitJson);
             if (!matcher.matches()) {
                 return null;
             } else if (matcher.group("id") != null) {

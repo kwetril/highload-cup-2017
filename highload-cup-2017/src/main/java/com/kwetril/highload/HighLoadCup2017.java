@@ -10,17 +10,22 @@ import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.http.server.ServerConfiguration;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransportBuilder;
 import org.glassfish.grizzly.strategies.SameThreadIOStrategy;
+import org.glassfish.jersey.client.ClientRequest;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpContainer;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.ext.RuntimeDelegate;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
@@ -31,12 +36,34 @@ public class HighLoadCup2017 {
     private static void initDb() throws Exception {
         try {
             ZipFile zipFile = new ZipFile("/tmp/data/data.zip");
+            //ZipFile zipFile = new ZipFile("data.zip");
             Enumeration<? extends ZipEntry> entries = zipFile.entries();
+            ArrayList<ZipEntry> x = new ArrayList<>();
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
+                x.add(entry);
+            }
+            x.sort((a, b) -> {
+                String aType = a.getName().split("_")[0];
+                String bType = a.getName().split("_")[0];
+                if (aType.equals("users")) {
+                    return -1;
+                }
+                if (bType.equals("users")) {
+                    return 1;
+                }
+                if (aType.equals("locations")) {
+                    return -1;
+                }
+                if (bType.equals("locations")) {
+                    return 1;
+                }
+                return 0;
+            });
+            for (ZipEntry entry : x) {
                 System.out.println(String.format("Processing entry: %s", entry.getName()));
                 InputStream stream = zipFile.getInputStream(entry);
-                try (BufferedReader buffer = new BufferedReader(new InputStreamReader(stream))) {
+                try (BufferedReader buffer = new BufferedReader(new InputStreamReader(stream, "UTF-8"))) {
                     String content = buffer.lines().collect(Collectors.joining("\n"));
                     switch (entry.getName().split("_")[0]) {
                         case "users":
@@ -97,7 +124,7 @@ public class HighLoadCup2017 {
 
     private static HttpServer initServer() {
         HttpServer server = new HttpServer();
-        server.addListener(new NetworkListener("grizzly", "0.0.0.0", 8081));
+        server.addListener(new NetworkListener("grizzly", "0.0.0.0", PORT));
 
         final TCPNIOTransportBuilder transportBuilder = TCPNIOTransportBuilder.newInstance();
         //transportBuilder.setIOStrategy(WorkerThreadIOStrategy.getInstance());
@@ -111,6 +138,37 @@ public class HighLoadCup2017 {
         return server;
     }
 
+    private static void warmUpServer() {
+        try {
+            long startTime = System.currentTimeMillis();
+            Client client = ClientBuilder.newClient();
+            for (int i = 0; i < 10; i++) {
+                for (int id : RepositoryProvider.repo.getUserIds()) {
+                    WebTarget target = client.target(String.format("http://127.0.0.1:%d/users/%d", PORT, id));
+                    target.request().get();
+                }
+                for (int id : RepositoryProvider.repo.getLocationIds()) {
+                    WebTarget target = client.target(String.format("http://127.0.0.1:%d/locations/%d", PORT, id));
+                    target.request().get();
+                }
+                for (int id : RepositoryProvider.repo.getUserIds()) {
+                    WebTarget target = client.target(String.format("http://127.0.0.1:%d/visists/%d", PORT, id));
+                    target.request().get();
+                }
+                System.out.println("WarmUp iteration: " + i);
+                if (System.currentTimeMillis() - startTime > 5000) {
+                    System.out.println("Finish WarmUp");
+                    break;
+                }
+            }
+        }
+        catch (Exception ex) {
+            System.out.println("Error on WarmUp");
+        }
+    }
+
+    public static int PORT = 80;
+
     public static void main(String[] args) throws Exception {
         initDb();
         final HttpServer server = initServer();
@@ -119,6 +177,8 @@ public class HighLoadCup2017 {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        warmUpServer();
+
         Thread.sleep(1000 * 60 * 60 * 24);
     }
 }

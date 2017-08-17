@@ -7,6 +7,6 @@ public class UserVisitData {
 
     @Override
     public String toString() {
-        return String.format("{\"mark\":%d,\"visitedAt\":%d,\"place\":\"%s\"}", mark, visitedAt, place);
+        return String.format("{\"mark\":%d,\"visited_at\":%d,\"place\":\"%s\"}", mark, visitedAt, place);
     }
 }

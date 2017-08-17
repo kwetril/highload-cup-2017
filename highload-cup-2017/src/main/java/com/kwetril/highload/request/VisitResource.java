@@ -30,12 +30,15 @@ public class VisitResource {
     @Produces({MediaType.APPLICATION_JSON})
     public Response editVisit(@PathParam("visitId") int visitId, String data) {
         VisitUpdate update = RequestParser.parseEditVisit(data);
+        if (update == null) {
+            return Response.status(400).entity("{}").build();
+        }
         update.visitId = visitId;
         boolean isUpdated = RepositoryProvider.repo.editVisit(update);
         if (isUpdated) {
-            return Response.status(200).build();
+            return Response.status(200).entity("{}").build();
         } else {
-            return Response.status(404).build();
+            return Response.status(404).entity("{}").build();
         }
     }
 
@@ -47,9 +50,9 @@ public class VisitResource {
         VisitData visit = RequestParser.parseNewVisit(data);
         if (visit != null) {
             RepositoryProvider.repo.addVisit(visit);
-            return Response.status(200).build();
+            return Response.status(200).entity("{}").build();
         } else {
-            return Response.status(404).build();
+            return Response.status(400).entity("{}").build();
         }
     }
 }
