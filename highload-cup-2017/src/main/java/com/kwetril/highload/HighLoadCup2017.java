@@ -22,75 +22,82 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Enumeration;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class HighLoadCup2017 {
     private static void initDb() throws Exception {
-        ZipFile zipFile = new ZipFile("data.zip");
-        Enumeration<? extends ZipEntry> entries = zipFile.entries();
-        while(entries.hasMoreElements()){
-            ZipEntry entry = entries.nextElement();
-            System.out.println(String.format("Processing entry: %s", entry.getName()));
-            InputStream stream = zipFile.getInputStream(entry);
-            try (BufferedReader buffer = new BufferedReader(new InputStreamReader(stream))) {
-                String content = buffer.lines().collect(Collectors.joining("\n"));
-                switch (entry.getName().split("_")[0]) {
-                    case "users":
-                        JSONObject usersObject = new JSONObject(content);
-                        JSONArray users = usersObject.getJSONArray("users");
-                        for (int i = 0; i < users.length(); i++) {
-                            JSONObject jsonObject = users.getJSONObject(i);
-                            String userJson = jsonObject.toString();
-                            UserData user = RequestParser.parseNewUser(userJson);
-                            if (user != null) {
-                                RepositoryProvider.repo.addUser(user);
-                            } else {
-                                throw new Exception(String.format("Couldn't parse %s", userJson));
+        try {
+            ZipFile zipFile = new ZipFile("/tmp/data/data.zip");
+            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+            while (entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
+                System.out.println(String.format("Processing entry: %s", entry.getName()));
+                InputStream stream = zipFile.getInputStream(entry);
+                try (BufferedReader buffer = new BufferedReader(new InputStreamReader(stream))) {
+                    String content = buffer.lines().collect(Collectors.joining("\n"));
+                    switch (entry.getName().split("_")[0]) {
+                        case "users":
+                            JSONObject usersObject = new JSONObject(content);
+                            JSONArray users = usersObject.getJSONArray("users");
+                            for (int i = 0; i < users.length(); i++) {
+                                JSONObject jsonObject = users.getJSONObject(i);
+                                String userJson = jsonObject.toString();
+                                UserData user = RequestParser.parseNewUser(userJson);
+                                if (user != null) {
+                                    RepositoryProvider.repo.addUser(user);
+                                } else {
+                                    throw new Exception(String.format("Couldn't parse %s", userJson));
+                                }
                             }
-                        }
-                        System.out.println(String.format("Users added: %s", RepositoryProvider.repo.countUsers()));
-                        break;
-                    case "locations":
-                        JSONObject locationsObject = new JSONObject(content);
-                        JSONArray locations = locationsObject.getJSONArray("locations");
-                        for (int i = 0; i < locations.length(); i++) {
-                            JSONObject jsonObject = locations.getJSONObject(i);
-                            String locationJson = jsonObject.toString();
-                            LocationData location = RequestParser.parseNewLocation(locationJson);
-                            if (location != null) {
-                                RepositoryProvider.repo.addLocation(location);
-                            } else {
-                                throw new Exception(String.format("Couldn't parse %s", locationJson));
+                            System.out.println(String.format("Users added: %s", RepositoryProvider.repo.countUsers()));
+                            break;
+                        case "locations":
+                            JSONObject locationsObject = new JSONObject(content);
+                            JSONArray locations = locationsObject.getJSONArray("locations");
+                            for (int i = 0; i < locations.length(); i++) {
+                                JSONObject jsonObject = locations.getJSONObject(i);
+                                String locationJson = jsonObject.toString();
+                                LocationData location = RequestParser.parseNewLocation(locationJson);
+                                if (location != null) {
+                                    RepositoryProvider.repo.addLocation(location);
+                                } else {
+                                    throw new Exception(String.format("Couldn't parse %s", locationJson));
+                                }
                             }
-                        }
-                        System.out.println(String.format("Locations added: %s", RepositoryProvider.repo.countLocations()));
-                        break;
-                    case "visits":
-                        JSONObject visitsObject = new JSONObject(content);
-                        JSONArray visits = visitsObject.getJSONArray("visits");
-                        for (int i = 0; i < visits.length(); i++) {
-                            JSONObject jsonObject = visits.getJSONObject(i);
-                            String visitJson = jsonObject.toString();
-                            VisitData visit = RequestParser.parseNewVisit(visitJson);
-                            if (visit != null) {
-                                RepositoryProvider.repo.addVisit(visit);
-                            } else {
-                                throw new Exception(String.format("Couldn't parse %s", visitJson));
+                            System.out.println(String.format("Locations added: %s", RepositoryProvider.repo.countLocations()));
+                            break;
+                        case "visits":
+                            JSONObject visitsObject = new JSONObject(content);
+                            JSONArray visits = visitsObject.getJSONArray("visits");
+                            for (int i = 0; i < visits.length(); i++) {
+                                JSONObject jsonObject = visits.getJSONObject(i);
+                                String visitJson = jsonObject.toString();
+                                VisitData visit = RequestParser.parseNewVisit(visitJson);
+                                if (visit != null) {
+                                    RepositoryProvider.repo.addVisit(visit);
+                                } else {
+                                    throw new Exception(String.format("Couldn't parse %s", visitJson));
+                                }
                             }
-                        }
-                        System.out.println(String.format("Visists added: %s", RepositoryProvider.repo.countVisits()));
-                        break;
+                            System.out.println(String.format("Visists added: %s", RepositoryProvider.repo.countVisits()));
+                            break;
+                    }
                 }
             }
+        }
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace();
         }
     }
 
 
     private static HttpServer initServer() {
         HttpServer server = new HttpServer();
-        server.addListener(new NetworkListener("grizzly", "127.0.0.1", 80));
+        server.addListener(new NetworkListener("grizzly", "0.0.0.0", 8081));
 
         final TCPNIOTransportBuilder transportBuilder = TCPNIOTransportBuilder.newInstance();
         //transportBuilder.setIOStrategy(WorkerThreadIOStrategy.getInstance());
@@ -112,7 +119,6 @@ public class HighLoadCup2017 {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.in.read();
-        server.shutdownNow();
+        Thread.sleep(1000 * 60 * 60 * 24);
     }
 }

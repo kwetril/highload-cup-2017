@@ -36,4 +36,4 @@ ADD highload-cup-2017-1.0-SNAPSHOT-jar-with-dependencies.jar /root/highload-cup-
 EXPOSE 80
 
 # Запускаем наш сервер
-CMD java -jar ./highload-cup-2017-1.0-SNAPSHOT-jar-with-dependencies.jar
+CMD -jar ./highload-cup-2017-1.0-SNAPSHOT-jar-with-dependencies.jar

@@ -8,8 +8,8 @@ import java.util.regex.Pattern;
 public class RequestParser {
     static Pattern userPattern = Pattern.compile("^\\s*\\{(\\s*(" +
             "(\"id\"\\s*:\\s*(?<id>\\d+)\\s*,?)" +
-            "|(\"first_name\"\\s*:\\s*\"(?<fname>\\p{L}+)\"\\s*,?)" +
-            "|(\"last_name\"\\s*:\\s*\"(?<lname>\\p{L}+)\"\\s*,?)" +
+            "|(\"first_name\"\\s*:\\s*\"(?<fname>[^\"]+)\"\\s*,?)" +
+            "|(\"last_name\"\\s*:\\s*\"(?<lname>[^\"]+)\"\\s*,?)" +
             "|(\"birth_date\"\\s*:\\s*(?<bdate>-?\\d+)\\s*,?)" +
             "|(\"gender\"\\s*:\\s*\"(?<gender>(m|f))\"\\s*,?)" +
             "|(\"email\"\\s*:\\s*\"(?<email>[\\w@\\.-]+)\"\\s*,?)" +
@@ -17,10 +17,10 @@ public class RequestParser {
 
     static Pattern locationPattern = Pattern.compile("^\\s*\\{(\\s*(" +
             "(\"id\"\\s*:\\s*(?<id>\\d+)\\s*,?)" +
-            "|(\"country\"\\s*:\\s*\"(?<country>[\\p{L} -]+)\"\\s*,?)" +
-            "|(\"city\"\\s*:\\s*\"(?<city>\\p{L}+)\"\\s*,?)" +
+            "|(\"country\"\\s*:\\s*\"(?<country>[^\"]+)\"\\s*,?)" +
+            "|(\"city\"\\s*:\\s*\"(?<city>[^\"]+)\"\\s*,?)" +
             "|(\"distance\"\\s*:\\s*(?<distance>\\d+)\\s*,?)" +
-            "|(\"place\"\\s*:\\s*\"(?<place>\\p{L}+)\"\\s*,?)" +
+            "|(\"place\"\\s*:\\s*\"(?<place>[^\"]+)\"\\s*,?)" +
             ")\\s*){1,5}\\}\\s*$");
 
     static Pattern visitPattern = Pattern.compile("^\\s*\\{(\\s*(" +
