@@ -82,7 +82,7 @@ public class UserResource {
             ArrayList<UserVisitData> userVisits = RepositoryProvider.repo.getUserVisits(userId,
                     hasFromDate, fromDate, hasToDate, toDate, country, hasDistance, distance);
             if (userVisits != null) {
-                StringBuilder sb = new StringBuilder();
+                StringBuilder sb = new StringBuilder(200);
                 sb.append("{\"visits\":[");
                 userVisits.sort((a, b) -> Long.compare(a.visitedAt, b.visitedAt));
                 int n = userVisits.size();
@@ -96,7 +96,7 @@ public class UserResource {
                 sb.append("]}");
                 return Response.status(200).entity(sb.toString()).build();
             } else {
-                return Response.status(400).entity("{}").build();
+                return Response.status(404).entity("{}").build();
             }
         } catch (Exception ex) {
             return Response.status(400).entity("{}").build();

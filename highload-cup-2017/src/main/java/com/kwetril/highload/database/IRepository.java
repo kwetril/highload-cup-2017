@@ -40,4 +40,11 @@ public interface IRepository {
                                            boolean hasToDate, long toDate,
                                            String country,
                                            boolean hasDistance, int distance);
+
+    double getLocationMark(int locationId,
+                           boolean hasFromDate, long fromDate,
+                           boolean hasToDate, long toDate,
+                           boolean hasFromAge, long fromAge,
+                           boolean hasToAge, long toAge,
+                           String gender);
 }
