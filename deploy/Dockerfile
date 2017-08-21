@@ -37,4 +37,4 @@ EXPOSE 80
 
 # Запускаем наш сервер
 #CMD java -jar -XX:+UseG1GC -XX:MaxGCPauseMillis=10  -XX:+PrintGC -XX:+PrintGCTimeStamps -Xmx4G -Xms3801m ./highload-cup-2017-1.0-SNAPSHOT-jar-with-dependencies.jar prod
-CMD java -jar -XX:+UseG1GC -XX:MaxGCPauseMillis=10  -XX:+PrintGC -XX:+PrintGCTimeStamps -Xmx4G -Xms3801m ./highload-cup-2017-netty-1.0-SNAPSHOT-jar-with-dependencies.jar prod
+CMD java -jar -XX:+UseConcMarkSweepGC -XX:MaxGCPauseMillis=200  -XX:+PrintGC -XX:-PrintGCDetails -XX:+PrintGCTimeStamps -Xmx3800m -Xms3800m -XX:NewSize=50m ./highload-cup-2017-netty-1.0-SNAPSHOT-jar-with-dependencies.jar prod

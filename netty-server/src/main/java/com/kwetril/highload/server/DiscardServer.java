@@ -450,7 +450,7 @@ class WebServerHandler extends SimpleChannelInboundHandler<Object> {
                 writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}");
             }
         } else {
-            writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}");
+            writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}");
         }
     }
 
