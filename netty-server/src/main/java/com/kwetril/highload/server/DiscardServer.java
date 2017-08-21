@@ -22,6 +22,7 @@ import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
@@ -285,7 +286,13 @@ class WebServerHandler extends SimpleChannelInboundHandler<Object> {
                             toDateStr = p.substring(7);
                             break;
                         case 'n':
-                            country = p.substring(8);
+                            try {
+                                country = java.net.URLDecoder.decode(p.substring(8), "UTF-8");
+                            } catch (UnsupportedEncodingException e) {
+                                writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}");
+                                e.printStackTrace();
+                                return;
+                            }
                             break;
                         case 'i':
                             toDistanceStr = p.substring(11);
@@ -448,12 +455,19 @@ class WebServerHandler extends SimpleChannelInboundHandler<Object> {
     }
 
     private void getUser(String[] uriParts, final ChannelHandlerContext ctx) {
-        int userId = Integer.parseInt(uriParts[2].split("\\?", 2)[0]);
+        String uid = uriParts[2].split("\\?", 2)[0];
+        int userId;
+        try {
+            userId = Integer.parseInt(uid);
+        } catch (Exception ex) {
+            writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}");
+            return;
+        }
         UserData user = RepositoryProvider.repo.getUser(userId);
         if (user != null) {
             writeResponse(ctx, HttpResponseStatus.OK, user.toString());
         } else {
-            writeResponse(ctx, HttpResponseStatus.NOT_FOUND, user.toString());
+            writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}");
         }
     }
 
