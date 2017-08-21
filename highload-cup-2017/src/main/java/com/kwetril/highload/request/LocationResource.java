@@ -1,6 +1,7 @@
 package com.kwetril.highload.request;
 
 import com.kwetril.highload.database.RepositoryProvider;
+import com.kwetril.highload.database.TimestampProvider;
 import com.kwetril.highload.parsing.RequestParser;
 
 import javax.ws.rs.*;
@@ -72,7 +73,7 @@ public class LocationResource {
                 return Response.status(400).entity("{}").build();
             }
             long fromDate = 0, toDate = 0, fromAge = 0, toAge = 0;
-            long currentMillis = System.currentTimeMillis();
+            long currentMillis = TimestampProvider.timestamp * 1000;
             boolean hasFromDate = fromDateStr != null;
             if (hasFromDate) fromDate = Long.parseLong(fromDateStr);
             boolean hasToDate = toDateStr != null;

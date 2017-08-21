@@ -30,10 +30,11 @@ RUN wget --quiet --no-check-certificate --no-cookies --header "Cookie: oraclelic
 WORKDIR /root
 
 # Копируем наш исходный main.go внутрь контейнера, в папку go/src/dumb
-ADD highload-cup-2017-1.0-SNAPSHOT-jar-with-dependencies.jar /root/highload-cup-2017-1.0-SNAPSHOT-jar-with-dependencies.jar
+ADD highload-cup-2017-netty-1.0-SNAPSHOT-jar-with-dependencies.jar /root/highload-cup-2017-netty-1.0-SNAPSHOT-jar-with-dependencies.jar
 
 # Открываем 80-й порт наружу
 EXPOSE 80
 
 # Запускаем наш сервер
-CMD java -jar -XX:+UseG1GC -XX:MaxGCPauseMillis=50 -Xmx4000m ./highload-cup-2017-1.0-SNAPSHOT-jar-with-dependencies.jar
+#CMD java -jar -XX:+UseG1GC -XX:MaxGCPauseMillis=10  -XX:+PrintGC -XX:+PrintGCTimeStamps -Xmx4G -Xms3801m ./highload-cup-2017-1.0-SNAPSHOT-jar-with-dependencies.jar prod
+CMD java -jar -XX:+UseG1GC -XX:MaxGCPauseMillis=10  -XX:+PrintGC -XX:+PrintGCTimeStamps -Xmx4G -Xms3801m ./highload-cup-2017-netty-1.0-SNAPSHOT-jar-with-dependencies.jar prod

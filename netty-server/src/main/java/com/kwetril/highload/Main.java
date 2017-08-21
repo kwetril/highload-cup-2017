@@ -6,40 +6,23 @@ import com.kwetril.highload.parsing.RequestParser;
 import com.kwetril.highload.request.LocationData;
 import com.kwetril.highload.request.UserData;
 import com.kwetril.highload.request.VisitData;
-import org.glassfish.grizzly.http.server.HttpServer;
-import org.glassfish.grizzly.http.server.NetworkListener;
-import org.glassfish.grizzly.http.server.ServerConfiguration;
-import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
-import org.glassfish.grizzly.nio.transport.TCPNIOTransportBuilder;
-import org.glassfish.grizzly.strategies.LeaderFollowerNIOStrategy;
-import org.glassfish.grizzly.strategies.SameThreadIOStrategy;
-import org.glassfish.grizzly.strategies.WorkerThreadIOStrategy;
-import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpContainer;
-import org.glassfish.jersey.jackson.JacksonFeature;
-import org.glassfish.jersey.server.ResourceConfig;
+import com.kwetril.highload.server.DiscardServer;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.RuntimeDelegate;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-public class HighLoadCup2017 {
+public class Main {
     private static void initDb() throws Exception {
         try {
             ZipFile zipFile = new ZipFile(DATA_PATH);
@@ -136,75 +119,50 @@ public class HighLoadCup2017 {
         }
     }
 
-    private static HttpServer initServer() {
-        HttpServer server = new HttpServer();
-        server.addListener(new NetworkListener("grizzly", "0.0.0.0", PORT));
-
-        final TCPNIOTransportBuilder transportBuilder = TCPNIOTransportBuilder.newInstance();
-        //transportBuilder.setIOStrategy(WorkerThreadIOStrategy.getInstance());
-        transportBuilder.setIOStrategy(SameThreadIOStrategy.getInstance());
-        //transportBuilder.setIOStrategy(LeaderFollowerNIOStrategy.getInstance());
-        transportBuilder.setSelectorRunnersCount(8);
-        try {
-            transportBuilder.getWorkerThreadPoolConfig().setCorePoolSize(1);
-            transportBuilder.getWorkerThreadPoolConfig().setMaxPoolSize(1);
-        }catch (Exception e) {
-            e.printStackTrace();
-        }
-        TCPNIOTransport transport = transportBuilder.build();
-        server.getListener("grizzly").setTransport(transport)    ;
-        final ResourceConfig rc = new ResourceConfig().packages("com.kwetril.highload");
-        rc.register(JacksonFeature.class);
-        final ServerConfiguration config = server.getServerConfiguration();
-        config.addHttpHandler(RuntimeDelegate.getInstance().createEndpoint(rc, GrizzlyHttpContainer.class), "/");
-
-        return server;
-    }
-
     private static void warmUpServer() {
-        try {
+    /*    try {
             long t0 = System.currentTimeMillis();
             //Thread[] warmupThreads = new Thread[10];
             //for (int t = 0; t < warmupThreads.length; t++) {
             //    warmupThreads[t] = new Thread(() -> {
-                    System.out.println("Start WarmUp");
-                    long startTime = System.currentTimeMillis();
-                    Client client = ClientBuilder.newClient();
-                    for (int i = 0; i < 10; i++) {
-                        int c = 0;
-                        for (int id : RepositoryProvider.repo.getUserIds()) {
-                            WebTarget target = client.target(String.format("http://127.0.0.1:%d/users/%d", PORT, id));
-                            Response response = target.request().get();
-                            response.close();
-                            c++;
-                            if (c > 1000) {
-                                break;
-                            }
-                        }
-                        c = 0;
-                        for (int id : RepositoryProvider.repo.getLocationIds()) {
-                            WebTarget target = client.target(String.format("http://127.0.0.1:%d/locations/%d", PORT, id));
-                            Response response = target.request().get();
-                            response.close();
-                            if (c > 1000) {
-                                break;
-                            }
-                        }
-                        c = 0;
-                        for (int id : RepositoryProvider.repo.getVisitIds()) {
-                            WebTarget target = client.target(String.format("http://127.0.0.1:%d/visits/%d", PORT, id));
-                            Response response = target.request().get();
-                            response.close();
-                            if (c > 1000) {
-                                break;
-                            }
-                        }
-                        System.out.println("WarmUp iteration: " + i);
-                        if (System.currentTimeMillis() - startTime > 15000) {
-                            System.out.println("Finish WarmUp");
-                            break;
-                        }
+            System.out.println("Start WarmUp");
+            long startTime = System.currentTimeMillis();
+            Client client = ClientBuilder.newClient();
+            for (int i = 0; i < 10; i++) {
+                int c = 0;
+                for (int id : RepositoryProvider.repo.getUserIds()) {
+                    WebTarget target = client.target(String.format("http://127.0.0.1:%d/users/%d", PORT, id));
+                    Response response = target.request().get();
+                    response.close();
+                    c++;
+                    if (c > 1000) {
+                        break;
                     }
+                }
+                c = 0;
+                for (int id : RepositoryProvider.repo.getLocationIds()) {
+                    WebTarget target = client.target(String.format("http://127.0.0.1:%d/locations/%d", PORT, id));
+                    Response response = target.request().get();
+                    response.close();
+                    if (c > 1000) {
+                        break;
+                    }
+                }
+                c = 0;
+                for (int id : RepositoryProvider.repo.getVisitIds()) {
+                    WebTarget target = client.target(String.format("http://127.0.0.1:%d/visits/%d", PORT, id));
+                    Response response = target.request().get();
+                    response.close();
+                    if (c > 1000) {
+                        break;
+                    }
+                }
+                System.out.println("WarmUp iteration: " + i);
+                if (System.currentTimeMillis() - startTime > 15000) {
+                    System.out.println("Finish WarmUp");
+                    break;
+                }
+            }
             //    });
             //}
             //for (int t = 0; t < warmupThreads.length; t++) {
@@ -218,7 +176,7 @@ public class HighLoadCup2017 {
         }
         catch (Exception ex) {
             System.out.println("Error on WarmUp " + ex.getMessage());
-        }
+        }*/
     }
 
     private static int PORT = 808;
@@ -226,18 +184,14 @@ public class HighLoadCup2017 {
     //public static String DATA_PATH = "/tmp/data/data.zip";
 
     public static void main(String[] args) throws Exception {
+        System.out.println("NETTY");
         if (args.length > 0) {
             PORT = 80;
             DATA_PATH = "/tmp/data/data.zip";
         }
         Locale.setDefault(Locale.US);
         initDb();
-        final HttpServer server = initServer();
-        try {
-            server.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        new DiscardServer(PORT).run();
         warmUpServer();
         System.gc();
         System.out.println(String.format("Total: %s; Free: %s", Runtime.getRuntime().totalMemory() / 1024. / 1024,
