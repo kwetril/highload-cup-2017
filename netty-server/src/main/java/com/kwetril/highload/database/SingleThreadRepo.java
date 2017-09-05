@@ -9,9 +9,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class SingleThreadRepo implements IRepository {
-    private final int MAX_USERS = 120000;
-    private final int MAX_LOCATIONS = 120000;
-    private final int MAX_VISITS = 1200000;
+    private final int MAX_USERS = 1200000;
+    private final int MAX_LOCATIONS = 1200000;
+    private final int MAX_VISITS = 12000000;
     private final UserData[] userCollection = new UserData[MAX_USERS];
     private final LocationData[] locationCollection = new LocationData[MAX_LOCATIONS];
     private final VisitData[] visitCollection = new VisitData[MAX_VISITS];

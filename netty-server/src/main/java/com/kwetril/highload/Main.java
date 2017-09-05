@@ -6,10 +6,15 @@ import com.kwetril.highload.parsing.RequestParser;
 import com.kwetril.highload.request.LocationData;
 import com.kwetril.highload.request.UserData;
 import com.kwetril.highload.request.VisitData;
-import com.kwetril.highload.server.DiscardServer;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.kwetril.highload.server.HigloadServer;
+import io.netty.handler.codec.http.DefaultFullHttpRequest;
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpVersion;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -23,6 +28,21 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class Main {
+    private static ArrayList<String> getCollection(String content) {
+        ArrayList<String> res = new ArrayList<>();
+        int firstStartBreaket = content.indexOf('{');
+        int secondStartBreaket = content.indexOf('{', firstStartBreaket + 1);
+        int i = secondStartBreaket;
+        while (i != -1) {
+            int start = i;
+            int end = content.indexOf('}', i);
+            res.add(content.substring(start, end + 1));
+            i = content.indexOf('{', end);
+        }
+        return res;
+    }
+
+
     private static void initDb() throws Exception {
         try {
             ZipFile zipFile = new ZipFile(DATA_PATH);
@@ -58,11 +78,9 @@ public class Main {
                     String content = buffer.lines().collect(Collectors.joining("\n"));
                     switch (entry.getName().split("_")[0]) {
                         case "users":
-                            JSONObject usersObject = new JSONObject(content);
-                            JSONArray users = usersObject.getJSONArray("users");
-                            for (int i = 0; i < users.length(); i++) {
-                                JSONObject jsonObject = users.getJSONObject(i);
-                                String userJson = jsonObject.toString();
+                            ArrayList<String> users = getCollection(content);
+                            for (int i = 0; i < users.size(); i++) {
+                                String userJson = users.get(i);
                                 UserData user = RequestParser.parseNewUser(userJson);
                                 if (user != null) {
                                     RepositoryProvider.repo.addUser(user);
@@ -73,10 +91,9 @@ public class Main {
                             System.out.println(String.format("Users added: %s", RepositoryProvider.repo.countUsers()));
                             break;
                         case "locations":
-                            JSONObject locationsObject = new JSONObject(content);
-                            JSONArray locations = locationsObject.getJSONArray("locations");
-                            for (int i = 0; i < locations.length(); i++) {
-                                JSONObject jsonObject = locations.getJSONObject(i);
+                            ArrayList<String> locations = getCollection(content);
+                            for (int i = 0; i < locations.size(); i++) {
+                                String jsonObject = locations.get(i);
                                 String locationJson = jsonObject.toString();
                                 LocationData location = RequestParser.parseNewLocation(locationJson);
                                 if (location != null) {
@@ -88,11 +105,9 @@ public class Main {
                             System.out.println(String.format("Locations added: %s", RepositoryProvider.repo.countLocations()));
                             break;
                         case "visits":
-                            JSONObject visitsObject = new JSONObject(content);
-                            JSONArray visits = visitsObject.getJSONArray("visits");
-                            for (int i = 0; i < visits.length(); i++) {
-                                JSONObject jsonObject = visits.getJSONObject(i);
-                                String visitJson = jsonObject.toString();
+                            ArrayList<String> visits = getCollection(content);
+                            for (int i = 0; i < visits.size(); i++) {
+                                String visitJson = visits.get(i);
                                 VisitData visit = RequestParser.parseNewVisit(visitJson);
                                 if (visit != null) {
                                     RepositoryProvider.repo.addVisit(visit);
@@ -119,83 +134,27 @@ public class Main {
         }
     }
 
-    private static void warmUpServer() {
-    /*    try {
-            long t0 = System.currentTimeMillis();
-            //Thread[] warmupThreads = new Thread[10];
-            //for (int t = 0; t < warmupThreads.length; t++) {
-            //    warmupThreads[t] = new Thread(() -> {
-            System.out.println("Start WarmUp");
-            long startTime = System.currentTimeMillis();
-            Client client = ClientBuilder.newClient();
-            for (int i = 0; i < 10; i++) {
-                int c = 0;
-                for (int id : RepositoryProvider.repo.getUserIds()) {
-                    WebTarget target = client.target(String.format("http://127.0.0.1:%d/users/%d", PORT, id));
-                    Response response = target.request().get();
-                    response.close();
-                    c++;
-                    if (c > 1000) {
-                        break;
-                    }
-                }
-                c = 0;
-                for (int id : RepositoryProvider.repo.getLocationIds()) {
-                    WebTarget target = client.target(String.format("http://127.0.0.1:%d/locations/%d", PORT, id));
-                    Response response = target.request().get();
-                    response.close();
-                    if (c > 1000) {
-                        break;
-                    }
-                }
-                c = 0;
-                for (int id : RepositoryProvider.repo.getVisitIds()) {
-                    WebTarget target = client.target(String.format("http://127.0.0.1:%d/visits/%d", PORT, id));
-                    Response response = target.request().get();
-                    response.close();
-                    if (c > 1000) {
-                        break;
-                    }
-                }
-                System.out.println("WarmUp iteration: " + i);
-                if (System.currentTimeMillis() - startTime > 15000) {
-                    System.out.println("Finish WarmUp");
-                    break;
-                }
-            }
-            //    });
-            //}
-            //for (int t = 0; t < warmupThreads.length; t++) {
-            //    warmupThreads[t].start();
-            //}
-            //for (int t = 0; t < warmupThreads.length; t++) {
-            //    warmupThreads[t].join();
-            //}
-            long t1 = System.currentTimeMillis();
-            System.out.println(String.format("WarmUP threads joined: %.3f sec", (t1 - t0) / 1000.));
-        }
-        catch (Exception ex) {
-            System.out.println("Error on WarmUp " + ex.getMessage());
-        }*/
-    }
-
     private static int PORT = 808;
     private static String DATA_PATH = "data.zip";
-    //public static String DATA_PATH = "/tmp/data/data.zip";
 
     public static void main(String[] args) throws Exception {
-        System.out.println("NETTY");
         if (args.length > 0) {
             PORT = 80;
             DATA_PATH = "/tmp/data/data.zip";
         }
         Locale.setDefault(Locale.US);
         initDb();
-        new DiscardServer(PORT).run();
-        warmUpServer();
+        Thread serverThread = new Thread(() -> {
+            try {
+                new HigloadServer(PORT).run();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        serverThread.start();
         System.gc();
         System.out.println(String.format("Total: %s; Free: %s", Runtime.getRuntime().totalMemory() / 1024. / 1024,
                 Runtime.getRuntime().freeMemory() / 1024. / 1024));
-        Thread.sleep(1000 * 60 * 60);
+        serverThread.join();
     }
 }

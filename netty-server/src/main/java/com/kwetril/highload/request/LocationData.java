@@ -8,6 +8,7 @@ public class LocationData {
     public String place;
     public String json;
 
+
     public void computeJson() {
         json = String.format("{\"id\":%s,\"country\":\"%s\",\"city\":\"%s\",\"place\":\"%s\",\"distance\":%s}",
                 locationId, country, city, place, distance);
@@ -16,5 +17,7 @@ public class LocationData {
     @Override
     public String toString() {
         return json;
+        //return String.format("{\"id\":%s,\"country\":\"%s\",\"city\":\"%s\",\"place\":\"%s\",\"distance\":%s}",
+        //        locationId, country, city, place, distance);
     }
 }

@@ -4,88 +4,21 @@ import com.kwetril.highload.database.RepositoryProvider;
 import com.kwetril.highload.database.TimestampProvider;
 import com.kwetril.highload.parsing.RequestParser;
 import com.kwetril.highload.request.*;
-import io.netty.bootstrap.ServerBootstrap;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.*;
-import io.netty.channel.epoll.Epoll;
-import io.netty.channel.epoll.EpollEventLoopGroup;
-import io.netty.channel.epoll.EpollServerSocketChannel;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.ChannelInputShutdownEvent;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
-import io.netty.handler.codec.http.multipart.InterfaceHttpData;
-import io.netty.handler.codec.serialization.ObjectDecoder;
-import io.netty.util.concurrent.DefaultEventExecutorGroup;
-import io.netty.util.concurrent.EventExecutorGroup;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-public class DiscardServer {
-    private int port;
-
-    public DiscardServer(int port) {
-        this.port = port;
-    }
-
-    public void run() throws Exception {
-        EventLoopGroup bossGroup;
-        EventLoopGroup workerGroup;
-        if (Epoll.isAvailable()) {
-            System.out.println("Using epoll");
-            bossGroup = new EpollEventLoopGroup();
-            workerGroup = new EpollEventLoopGroup();
-        } else {
-            System.out.println("Using nio");
-            bossGroup = new NioEventLoopGroup();
-            workerGroup = new NioEventLoopGroup();
-        }
-        //final EventExecutorGroup logicProcessor = new DefaultEventExecutorGroup(1);
-        try {
-            ServerBootstrap b = new ServerBootstrap();
-            b.group(bossGroup, workerGroup);
-
-            if (Epoll.isAvailable()) {
-                b.channel(EpollServerSocketChannel.class);
-            } else {
-                b.channel(NioServerSocketChannel.class);
-            }
-            b.childHandler(new ChannelInitializer<SocketChannel>() {
-                @Override
-                public void initChannel(SocketChannel ch) throws Exception {
-                    ch.pipeline()
-                            .addLast("decoder", new HttpRequestDecoder(4096, 8192, 8192, false))
-                            .addLast("aggregator", new HttpObjectAggregator(2 * 1024 * 1024))
-                            .addLast("encoder", new HttpResponseEncoder())
-                            .addLast("handler", new WebServerHandler());
-                }
-            })
-                    .option(ChannelOption.SO_BACKLOG, 128);
-            //.childOption(ChannelOption.SO_KEEPALIVE, true);
-
-            // Bind and start to accept incoming connections.
-            ChannelFuture f = b.bind(port).sync();
-
-            f.channel().closeFuture().sync();
-        } finally {
-            workerGroup.shutdownGracefully();
-            bossGroup.shutdownGracefully();
-        }
-    }
-}
-
-
-class WebServerHandler extends SimpleChannelInboundHandler<Object> {
+class HighloadServerHandler extends SimpleChannelInboundHandler<Object> {
     private Object userLock = new Object();
     private Object locationLock = new Object();
     private Object visitLock = new Object();
@@ -176,11 +109,11 @@ class WebServerHandler extends SimpleChannelInboundHandler<Object> {
         }
         catch (Exception e) {
             System.out.println(String.format("Error %s: %s", e.getMessage(), uri));
-            writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}");
+            writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", method.charAt(0) == 'G');
             return;
         }
         System.out.println(String.format("Not found: %s", uri));
-        writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}");
+        writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}", method.charAt(0) == 'G');
     }
 
     private void getLocationAvg(String[] parts, final ChannelHandlerContext ctx) {
@@ -218,12 +151,12 @@ class WebServerHandler extends SimpleChannelInboundHandler<Object> {
                 }
                 break;
             default:
-                writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}");
+                writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", true);
                 return;
         }
         try {
             if (gender != null && (gender.length() > 1 || (gender.charAt(0) != 'm' && gender.charAt(0) != 'f'))) {
-                writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}");
+                writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", true);
                 return;
             }
             long fromDate = 0, toDate = 0, fromAge = 0, toAge = 0;
@@ -253,14 +186,14 @@ class WebServerHandler extends SimpleChannelInboundHandler<Object> {
                     hasFromAge, fromAge, hasToAge, toAge,
                     gender);
             if (avg >= -0.5) {
-                writeResponse(ctx, HttpResponseStatus.OK, String.format("{\"avg\":%.5f}", avg));
+                writeResponse(ctx, HttpResponseStatus.OK, String.format("{\"avg\":%.5f}", avg), true);
                 return;
             } else {
-                writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}");
+                writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}", true);
                 return;
             }
         } catch (Exception ex) {
-            writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}");
+            writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", true);
         }
     }
 
@@ -289,7 +222,7 @@ class WebServerHandler extends SimpleChannelInboundHandler<Object> {
                             try {
                                 country = java.net.URLDecoder.decode(p.substring(8), "UTF-8");
                             } catch (UnsupportedEncodingException e) {
-                                writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}");
+                                writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", true);
                                 e.printStackTrace();
                                 return;
                             }
@@ -301,7 +234,7 @@ class WebServerHandler extends SimpleChannelInboundHandler<Object> {
                 }
                 break;
             default:
-                writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}");
+                writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", true);
                 return;
         }
         try {
@@ -329,14 +262,14 @@ class WebServerHandler extends SimpleChannelInboundHandler<Object> {
                     }
                 }
                 sb.append("]}");
-                writeResponse(ctx, HttpResponseStatus.OK, sb.toString());
+                writeResponse(ctx, HttpResponseStatus.OK, sb.toString(), true);
                 return;
             } else {
-                writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}");
+                writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}", true);
                 return;
             }
         } catch (Exception ex) {
-            writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}");
+            writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", true);
         }
     }
 
@@ -345,7 +278,7 @@ class WebServerHandler extends SimpleChannelInboundHandler<Object> {
         String data = content.toString(Charset.forName("UTF-8"));
         VisitUpdate update = RequestParser.parseEditVisit(data);
         if (update == null) {
-            writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}");
+            writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", false);
             return;
         }
         update.visitId = visitId;
@@ -354,9 +287,9 @@ class WebServerHandler extends SimpleChannelInboundHandler<Object> {
             isUpdated = RepositoryProvider.repo.editVisit(update);
         }
         if (isUpdated) {
-            writeResponse(ctx, HttpResponseStatus.OK, "{}");
+            writeResponse(ctx, HttpResponseStatus.OK, "{}", false);
         } else {
-            writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}");
+            writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}", false);
         }
     }
 
@@ -369,12 +302,12 @@ class WebServerHandler extends SimpleChannelInboundHandler<Object> {
                 isInserted = RepositoryProvider.repo.addVisit(visit);
             }
             if (isInserted) {
-                writeResponse(ctx, HttpResponseStatus.OK, "{}");
+                writeResponse(ctx, HttpResponseStatus.OK, "{}", false);
             } else {
-                writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}");
+                writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", false);
             }
         } else {
-            writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}");
+            writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", false);
         }
     }
 
@@ -383,7 +316,7 @@ class WebServerHandler extends SimpleChannelInboundHandler<Object> {
         String data = content.toString(Charset.forName("UTF-8"));
         LocationUpdate update = RequestParser.parseEditLocation(data);
         if (update == null) {
-            writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}");
+            writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", false);
             return;
         }
         update.locationId = locationId;
@@ -392,9 +325,9 @@ class WebServerHandler extends SimpleChannelInboundHandler<Object> {
             isUpdated = RepositoryProvider.repo.editLocation(update);
         }
         if (isUpdated) {
-            writeResponse(ctx, HttpResponseStatus.OK, "{}");
+            writeResponse(ctx, HttpResponseStatus.OK, "{}", false);
         } else {
-            writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}");
+            writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}", false);
         }
     }
 
@@ -407,12 +340,12 @@ class WebServerHandler extends SimpleChannelInboundHandler<Object> {
                 isInserted = RepositoryProvider.repo.addLocation(location);
             }
             if (isInserted) {
-                writeResponse(ctx, HttpResponseStatus.OK, "{}");
+                writeResponse(ctx, HttpResponseStatus.OK, "{}", false);
             } else {
-                writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}");
+                writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", false);
             }
         } else {
-            writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}");
+            writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", false);
         }
     }
 
@@ -421,7 +354,7 @@ class WebServerHandler extends SimpleChannelInboundHandler<Object> {
         String data = content.toString(Charset.forName("UTF-8"));
         UserUpdate update = RequestParser.parseEditUser(data);
         if (update == null) {
-            writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}");
+            writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", false);
             return;
         }
         update.userId = userId;
@@ -430,9 +363,9 @@ class WebServerHandler extends SimpleChannelInboundHandler<Object> {
             isUpdated = RepositoryProvider.repo.editUser(update);
         }
         if (isUpdated) {
-            writeResponse(ctx, HttpResponseStatus.OK, "{}");
+            writeResponse(ctx, HttpResponseStatus.OK, "{}", false);
         } else {
-            writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}");
+            writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}", false);
         }
     }
 
@@ -445,12 +378,12 @@ class WebServerHandler extends SimpleChannelInboundHandler<Object> {
                 userAdded = RepositoryProvider.repo.addUser(user);
             }
             if (userAdded) {
-                writeResponse(ctx, HttpResponseStatus.OK, "{}");
+                writeResponse(ctx, HttpResponseStatus.OK, "{}", false);
             } else {
-                writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}");
+                writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", false);
             }
         } else {
-            writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}");
+            writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", false);
         }
     }
 
@@ -460,14 +393,14 @@ class WebServerHandler extends SimpleChannelInboundHandler<Object> {
         try {
             userId = Integer.parseInt(uid);
         } catch (Exception ex) {
-            writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}");
+            writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}", true);
             return;
         }
         UserData user = RepositoryProvider.repo.getUser(userId);
         if (user != null) {
-            writeResponse(ctx, HttpResponseStatus.OK, user.toString());
+            writeResponse(ctx, HttpResponseStatus.OK, user.toString(), true);
         } else {
-            writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}");
+            writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}", true);
         }
     }
 
@@ -475,9 +408,9 @@ class WebServerHandler extends SimpleChannelInboundHandler<Object> {
         int locationId = Integer.parseInt(uriParts[2].split("\\?", 2)[0]);
         LocationData location = RepositoryProvider.repo.getLocation(locationId);
         if (location != null) {
-            writeResponse(ctx, HttpResponseStatus.OK, location.toString());
+            writeResponse(ctx, HttpResponseStatus.OK, location.toString(), true);
         } else {
-            writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}");
+            writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}", true);
         }
     }
 
@@ -485,9 +418,9 @@ class WebServerHandler extends SimpleChannelInboundHandler<Object> {
         int visitId = Integer.parseInt(uri.split("/")[2].split("\\?", 2)[0]);
         VisitData visit = RepositoryProvider.repo.getVisit(visitId);
         if (visit != null) {
-            writeResponse(ctx, HttpResponseStatus.OK, visit.toString());
+            writeResponse(ctx, HttpResponseStatus.OK, visit.toString(), true);
         } else {
-            writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}");
+            writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}", true);
         }
     }
 
@@ -501,7 +434,7 @@ class WebServerHandler extends SimpleChannelInboundHandler<Object> {
     private static void writeResponse(
             final ChannelHandlerContext ctx,
             final HttpResponseStatus status,
-            final String content) {
+            final String content, final boolean keepAlive) {
 
         final byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
         final ByteBuf entity = Unpooled.wrappedBuffer(bytes);
@@ -516,7 +449,12 @@ class WebServerHandler extends SimpleChannelInboundHandler<Object> {
         headers.set(HttpHeaderNames.CONTENT_LENGTH, Integer.toString(bytes.length));
 
         // Close the non-keep-alive connection after the write operation is done.
-        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+        //ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+        if (!keepAlive) {
+            ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+        } else {
+            ctx.writeAndFlush(response, ctx.voidPromise());
+        }
     }
 
     /**
