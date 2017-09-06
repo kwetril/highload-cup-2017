@@ -36,7 +36,4 @@ ADD highload-cup-2017-netty-1.0-SNAPSHOT-jar-with-dependencies.jar /root/highloa
 EXPOSE 80
 
 # Запускаем наш сервер
-#CMD java -jar -XX:+UseG1GC -XX:MaxGCPauseMillis=10  -XX:+PrintGC -XX:+PrintGCTimeStamps -Xmx4G -Xms3801m ./highload-cup-2017-1.0-SNAPSHOT-jar-with-dependencies.jar prod
-#CMD java -jar -XX:+UseConcMarkSweepGC -XX:MaxGCPauseMillis=200  -XX:+PrintGC -XX:-PrintGCDetails -XX:+PrintGCTimeStamps -Xmx3800m -Xms3800m -XX:NewSize=200m ./highload-cup-2017-netty-1.0-SNAPSHOT-jar-with-dependencies.jar prod
-#CMD java -jar -XX:+UseG1GC  -XX:MaxGCPauseMillis=20  -XX:-PrintGCDetails -XX:+PrintGC -XX:+PrintGCTimeStamps -Xmx3800m -Xms3800m -XX:NewSize=800m -XX:MaxNewSize=800m -XX:PermSize=500m -XX:MaxPermSize=1024m ./highload-cup-2017-netty-1.0-SNAPSHOT-jar-with-dependencies.jar prod
-CMD java -jar -XX:+UseG1GC -XX:MaxGCPauseMillis=20  -XX:+PrintGC -XX:-PrintGCDetails -XX:+PrintGCTimeStamps -Xmx3800m -Xms3800m ./highload-cup-2017-netty-1.0-SNAPSHOT-jar-with-dependencies.jar prod
+CMD java -jar -XX:+UseG1GC -XX:MaxGCPauseMillis=500 -XX:NewSize=600m -XX:MaxNewSize=600m -XX:+AggressiveOpts -XX:+UseCompressedOops -XX:+PrintGC -XX:-PrintGCDetails -XX:+PrintGCTimeStamps -Xmx3500m -Xms3500m ./highload-cup-2017-netty-1.0-SNAPSHOT-jar-with-dependencies.jar prod

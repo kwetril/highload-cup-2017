@@ -6,18 +6,18 @@ public class LocationData {
     public String city;
     public String country;
     public String place;
-    public String json;
+    //public String json;
 
 
     public void computeJson() {
-        json = String.format("{\"id\":%s,\"country\":\"%s\",\"city\":\"%s\",\"place\":\"%s\",\"distance\":%s}",
-                locationId, country, city, place, distance);
+    //    json = String.format("{\"id\":%s,\"country\":\"%s\",\"city\":\"%s\",\"place\":\"%s\",\"distance\":%s}",
+    //            locationId, country, city, place, distance);
     }
 
     @Override
     public String toString() {
-        return json;
-        //return String.format("{\"id\":%s,\"country\":\"%s\",\"city\":\"%s\",\"place\":\"%s\",\"distance\":%s}",
-        //        locationId, country, city, place, distance);
+        //return json;
+        return String.format("{\"id\":%s,\"country\":\"%s\",\"city\":\"%s\",\"place\":\"%s\",\"distance\":%s}",
+                locationId, country, city, place, distance);
     }
 }

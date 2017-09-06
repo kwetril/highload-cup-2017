@@ -7,17 +7,17 @@ public class UserData {
     public String firstName;
     public String lastName;
     public String gender;
-    public String json;
+    //public String json;
 
     public void computeJson() {
-        json = String.format("{\"id\":%s,\"email\":\"%s\",\"first_name\":\"%s\",\"last_name\":\"%s\",\"gender\":\"%s\",\"birth_date\":%s}",
-                userId, email, firstName, lastName, gender, birthDate);
+    //    json = String.format("{\"id\":%s,\"email\":\"%s\",\"first_name\":\"%s\",\"last_name\":\"%s\",\"gender\":\"%s\",\"birth_date\":%s}",
+    //            userId, email, firstName, lastName, gender, birthDate);
     }
 
     @Override
     public String toString() {
-        return json;
-        //return String.format("{\"id\":%s,\"email\":\"%s\",\"first_name\":\"%s\",\"last_name\":\"%s\",\"gender\":\"%s\",\"birth_date\":%s}",
-        //        userId, email, firstName, lastName, gender, birthDate);
+        //return json;
+        return String.format("{\"id\":%s,\"email\":\"%s\",\"first_name\":\"%s\",\"last_name\":\"%s\",\"gender\":\"%s\",\"birth_date\":%s}",
+                userId, email, firstName, lastName, gender, birthDate);
     }
 }
