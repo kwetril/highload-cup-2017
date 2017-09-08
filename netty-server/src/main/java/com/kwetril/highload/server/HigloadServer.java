@@ -27,16 +27,17 @@ public class HigloadServer {
         EventLoopGroup workerGroup;
         if (Epoll.isAvailable()) {
             System.out.println("Using epoll");
-            bossGroup = new EpollEventLoopGroup();
+            bossGroup = new EpollEventLoopGroup(1);
             workerGroup = new EpollEventLoopGroup();
         } else {
             System.out.println("Using nio");
-            bossGroup = new NioEventLoopGroup();
+            bossGroup = new NioEventLoopGroup(1);
             workerGroup = new NioEventLoopGroup();
         }
         //final EventExecutorGroup logicProcessor = new DefaultEventExecutorGroup(1);
         try {
             ServerBootstrap b = new ServerBootstrap();
+            b.option(ChannelOption.SO_BACKLOG, 1024);
             b.group(bossGroup, workerGroup);
 
             if (Epoll.isAvailable()) {
@@ -53,8 +54,7 @@ public class HigloadServer {
                             .addLast("encoder", new HttpResponseEncoder())
                             .addLast("handler", new HighloadServerHandler());
                 }
-            })
-                    .option(ChannelOption.SO_BACKLOG, 128);
+            });
             //.childOption(ChannelOption.SO_KEEPALIVE, true);
 
             // Bind and start to accept incoming connections.

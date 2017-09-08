@@ -109,11 +109,11 @@ class HighloadServerHandler extends SimpleChannelInboundHandler<Object> {
         }
         catch (Exception e) {
             System.out.println(String.format("Error %s: %s", e.getMessage(), uri));
-            writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", method.charAt(0) == 'G');
+            writeResponse(ctx, Response400, method.charAt(0) == 'G');
             return;
         }
         System.out.println(String.format("Not found: %s", uri));
-        writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}", method.charAt(0) == 'G');
+        writeResponse(ctx, Response404, method.charAt(0) == 'G');
     }
 
     private void getLocationAvg(String[] parts, final ChannelHandlerContext ctx) {
@@ -151,7 +151,7 @@ class HighloadServerHandler extends SimpleChannelInboundHandler<Object> {
                 }
                 break;
             default:
-                writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", true);
+                writeResponse(ctx, Response400, true);
                 return;
         }
         try {
@@ -189,11 +189,11 @@ class HighloadServerHandler extends SimpleChannelInboundHandler<Object> {
                 writeResponse(ctx, HttpResponseStatus.OK, String.format("{\"avg\":%.5f}", avg), true);
                 return;
             } else {
-                writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}", true);
+                writeResponse(ctx, Response404, true);
                 return;
             }
         } catch (Exception ex) {
-            writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", true);
+            writeResponse(ctx, Response400, true);
         }
     }
 
@@ -222,7 +222,7 @@ class HighloadServerHandler extends SimpleChannelInboundHandler<Object> {
                             try {
                                 country = java.net.URLDecoder.decode(p.substring(8), "UTF-8");
                             } catch (UnsupportedEncodingException e) {
-                                writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", true);
+                                writeResponse(ctx, Response400, true);
                                 e.printStackTrace();
                                 return;
                             }
@@ -234,7 +234,7 @@ class HighloadServerHandler extends SimpleChannelInboundHandler<Object> {
                 }
                 break;
             default:
-                writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", true);
+                writeResponse(ctx, Response400, true);
                 return;
         }
         try {
@@ -265,11 +265,11 @@ class HighloadServerHandler extends SimpleChannelInboundHandler<Object> {
                 writeResponse(ctx, HttpResponseStatus.OK, sb.toString(), true);
                 return;
             } else {
-                writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}", true);
+                writeResponse(ctx, Response404, true);
                 return;
             }
         } catch (Exception ex) {
-            writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", true);
+            writeResponse(ctx, Response400, true);
         }
     }
 
@@ -278,7 +278,7 @@ class HighloadServerHandler extends SimpleChannelInboundHandler<Object> {
         String data = content.toString(Charset.forName("UTF-8"));
         VisitUpdate update = RequestParser.parseEditVisit(data);
         if (update == null) {
-            writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", false);
+            writeResponse(ctx, Response400, false);
             return;
         }
         update.visitId = visitId;
@@ -287,9 +287,9 @@ class HighloadServerHandler extends SimpleChannelInboundHandler<Object> {
             isUpdated = RepositoryProvider.repo.editVisit(update);
         }
         if (isUpdated) {
-            writeResponse(ctx, HttpResponseStatus.OK, "{}", false);
+            writeResponse(ctx, Response200, false);
         } else {
-            writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}", false);
+            writeResponse(ctx, Response404, false);
         }
     }
 
@@ -302,12 +302,12 @@ class HighloadServerHandler extends SimpleChannelInboundHandler<Object> {
                 isInserted = RepositoryProvider.repo.addVisit(visit);
             }
             if (isInserted) {
-                writeResponse(ctx, HttpResponseStatus.OK, "{}", false);
+                writeResponse(ctx, Response200, false);
             } else {
-                writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", false);
+                writeResponse(ctx, Response400, false);
             }
         } else {
-            writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", false);
+            writeResponse(ctx, Response400, false);
         }
     }
 
@@ -316,7 +316,7 @@ class HighloadServerHandler extends SimpleChannelInboundHandler<Object> {
         String data = content.toString(Charset.forName("UTF-8"));
         LocationUpdate update = RequestParser.parseEditLocation(data);
         if (update == null) {
-            writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", false);
+            writeResponse(ctx, Response400, false);
             return;
         }
         update.locationId = locationId;
@@ -325,9 +325,9 @@ class HighloadServerHandler extends SimpleChannelInboundHandler<Object> {
             isUpdated = RepositoryProvider.repo.editLocation(update);
         }
         if (isUpdated) {
-            writeResponse(ctx, HttpResponseStatus.OK, "{}", false);
+            writeResponse(ctx, Response200, false);
         } else {
-            writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}", false);
+            writeResponse(ctx, Response404, false);
         }
     }
 
@@ -340,12 +340,12 @@ class HighloadServerHandler extends SimpleChannelInboundHandler<Object> {
                 isInserted = RepositoryProvider.repo.addLocation(location);
             }
             if (isInserted) {
-                writeResponse(ctx, HttpResponseStatus.OK, "{}", false);
+                writeResponse(ctx, Response200, false);
             } else {
-                writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", false);
+                writeResponse(ctx, Response400, false);
             }
         } else {
-            writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", false);
+            writeResponse(ctx, Response400, false);
         }
     }
 
@@ -354,7 +354,7 @@ class HighloadServerHandler extends SimpleChannelInboundHandler<Object> {
         String data = content.toString(Charset.forName("UTF-8"));
         UserUpdate update = RequestParser.parseEditUser(data);
         if (update == null) {
-            writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", false);
+            writeResponse(ctx, Response400, false);
             return;
         }
         update.userId = userId;
@@ -363,9 +363,9 @@ class HighloadServerHandler extends SimpleChannelInboundHandler<Object> {
             isUpdated = RepositoryProvider.repo.editUser(update);
         }
         if (isUpdated) {
-            writeResponse(ctx, HttpResponseStatus.OK, "{}", false);
+            writeResponse(ctx, Response200, false);
         } else {
-            writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}", false);
+            writeResponse(ctx, Response404, false);
         }
     }
 
@@ -378,12 +378,12 @@ class HighloadServerHandler extends SimpleChannelInboundHandler<Object> {
                 userAdded = RepositoryProvider.repo.addUser(user);
             }
             if (userAdded) {
-                writeResponse(ctx, HttpResponseStatus.OK, "{}", false);
+                writeResponse(ctx, Response200, false);
             } else {
-                writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", false);
+                writeResponse(ctx, Response400, false);
             }
         } else {
-            writeResponse(ctx, HttpResponseStatus.BAD_REQUEST, "{}", false);
+            writeResponse(ctx, Response400, false);
         }
     }
 
@@ -393,14 +393,14 @@ class HighloadServerHandler extends SimpleChannelInboundHandler<Object> {
         try {
             userId = Integer.parseInt(uid);
         } catch (Exception ex) {
-            writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}", true);
+            writeResponse(ctx, Response404, true);
             return;
         }
         UserData user = RepositoryProvider.repo.getUser(userId);
         if (user != null) {
             writeResponse(ctx, HttpResponseStatus.OK, user.toString(), true);
         } else {
-            writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}", true);
+            writeResponse(ctx, Response404, true);
         }
     }
 
@@ -410,7 +410,7 @@ class HighloadServerHandler extends SimpleChannelInboundHandler<Object> {
         if (location != null) {
             writeResponse(ctx, HttpResponseStatus.OK, location.toString(), true);
         } else {
-            writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}", true);
+            writeResponse(ctx, Response404, true);
         }
     }
 
@@ -420,7 +420,46 @@ class HighloadServerHandler extends SimpleChannelInboundHandler<Object> {
         if (visit != null) {
             writeResponse(ctx, HttpResponseStatus.OK, visit.toString(), true);
         } else {
-            writeResponse(ctx, HttpResponseStatus.NOT_FOUND, "{}", true);
+            writeResponse(ctx, Response404, true);
+        }
+    }
+
+    private static FullHttpResponse createResponse(final HttpResponseStatus status,
+                                  final String content) {
+        final byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
+        final ByteBuf entity =  Unpooled.wrappedBuffer(bytes);
+
+        final FullHttpResponse response = new DefaultFullHttpResponse(
+                HttpVersion.HTTP_1_1,
+                status, entity, false);
+
+        final DefaultHttpHeaders headers = (DefaultHttpHeaders) response.headers();
+        headers.set(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON);
+        headers.set(HttpHeaderNames.CONTENT_LENGTH, Integer.toString(bytes.length));
+        return response;
+    }
+
+    private static final FullHttpResponse Response404 = createResponse(HttpResponseStatus.NOT_FOUND, "{}");
+    private static final FullHttpResponse Response400 = createResponse(HttpResponseStatus.BAD_REQUEST, "{}");
+    private static final FullHttpResponse Response200 = createResponse(HttpResponseStatus.OK, "{}");
+
+    /**
+     * Writes a HTTP response.
+     *
+     * @param ctx     The channel context.
+     * @param response The response content.
+     */
+    private static void writeResponse(
+            final ChannelHandlerContext ctx,
+            final FullHttpResponse response,
+            final boolean keepAlive) {
+        // Close the non-keep-alive connection after the write operation is done.
+        //ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+        response.content().retainedDuplicate();
+        if (!keepAlive) {
+            ctx.writeAndFlush(response.retainedDuplicate()).addListener(ChannelFutureListener.CLOSE);
+        } else {
+            ctx.writeAndFlush(response.retainedDuplicate(), ctx.voidPromise());
         }
     }
 
