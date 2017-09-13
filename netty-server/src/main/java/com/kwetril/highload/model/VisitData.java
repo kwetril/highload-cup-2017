@@ -1,4 +1,4 @@
-package com.kwetril.highload.request;
+package com.kwetril.highload.model;
 
 public class VisitData {
     public int visitId;
@@ -6,12 +6,6 @@ public class VisitData {
     public int locationId;
     public int mark;
     public int visitedAt;
-    //public String json;
-
-    public void computeJson() {
-        //json = String.format("{\"id\":%s,\"user\":%s,\"location\":%s,\"mark\":%s,\"visited_at\":%s}",
-        //        visitId, userId, locationId, mark, visitedAt);
-    }
 
     @Override
     public String toString() {

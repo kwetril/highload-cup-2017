@@ -1,14 +1,12 @@
 package com.kwetril.highload.database;
 
-import com.kwetril.highload.request.*;
+import com.kwetril.highload.model.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
-public class SingleThreadRepo implements IRepository {
+public class SingleThreadRepository implements IRepository {
     private final int MAX_USERS = 1200000;
     private final int MAX_LOCATIONS = 1200000;
     private final int MAX_VISITS = 12000000;
@@ -27,7 +25,6 @@ public class SingleThreadRepo implements IRepository {
         UserData existingUser = userCollection[user.userId];
         if (existingUser == null) {
             userCollection[user.userId] = user;
-            user.computeJson();
             numUsers++;
             return true;
         }
@@ -39,16 +36,6 @@ public class SingleThreadRepo implements IRepository {
             return null;
         }
         return userCollection[userId];
-    }
-
-    public Iterable<Integer> getUserIds() {
-        ArrayList<Integer> ids = new ArrayList<>();
-        for (int i = 0; i < MAX_USERS; i++) {
-            if (userCollection[i] != null) {
-                ids.add(i);
-            }
-        }
-        return ids;
     }
 
     public int countUsers() {
@@ -73,7 +60,6 @@ public class SingleThreadRepo implements IRepository {
             if (update.isBirthDateUpdated) {
                 user.birthDate = update.birthDate;
             }
-            user.computeJson();
             return true;
         } else {
             return false;
@@ -84,7 +70,6 @@ public class SingleThreadRepo implements IRepository {
         LocationData existingLocation = locationCollection[location.locationId];
         if (existingLocation == null) {
             locationCollection[location.locationId] = location;
-            location.computeJson();
             numLocations++;
             return true;
         }
@@ -96,16 +81,6 @@ public class SingleThreadRepo implements IRepository {
             return null;
         }
         return locationCollection[locationId];
-    }
-
-    public Iterable<Integer> getLocationIds() {
-        ArrayList<Integer> ids = new ArrayList<>();
-        for (int i = 0; i < MAX_LOCATIONS; i++) {
-            if (locationCollection[i] != null) {
-                ids.add(i);
-            }
-        }
-        return ids;
     }
 
     public int countLocations() {
@@ -127,7 +102,6 @@ public class SingleThreadRepo implements IRepository {
             if (update.isDistanceUpdated) {
                 location.distance = update.distance;
             }
-            location.computeJson();
             return true;
         } else {
             return false;
@@ -139,7 +113,6 @@ public class SingleThreadRepo implements IRepository {
         if (existingVisit == null
                 && getUser(visit.userId) != null
                 && getLocation(visit.locationId) != null) {
-            visit.computeJson();
             visitCollection[visit.visitId] = visit;
             HashSet<Integer> userVisits = userVisitsCollection[visit.userId];
             if (userVisits == null) {
@@ -165,16 +138,6 @@ public class SingleThreadRepo implements IRepository {
             return null;
         }
         return visitCollection[visitId];
-    }
-
-    public Iterable<Integer> getVisitIds() {
-        ArrayList<Integer> ids = new ArrayList<>();
-        for (int i = 0; i < MAX_VISITS; i++) {
-            if (visitCollection[i] != null) {
-                ids.add(i);
-            }
-        }
-        return ids;
     }
 
     public int countVisits() {
@@ -220,7 +183,6 @@ public class SingleThreadRepo implements IRepository {
             if (update.isVisitedAtUpdated) {
                 visit.visitedAt = update.visitedAt;
             }
-            visit.computeJson();
             return true;
         } else {
             return false;

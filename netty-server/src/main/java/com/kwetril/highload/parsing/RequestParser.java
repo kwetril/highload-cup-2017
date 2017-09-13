@@ -1,6 +1,6 @@
 package com.kwetril.highload.parsing;
 
-import com.kwetril.highload.request.*;
+import com.kwetril.highload.model.*;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

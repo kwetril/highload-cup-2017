@@ -3,7 +3,7 @@ package com.kwetril.highload.server;
 import com.kwetril.highload.database.RepositoryProvider;
 import com.kwetril.highload.database.TimestampProvider;
 import com.kwetril.highload.parsing.RequestParser;
-import com.kwetril.highload.request.*;
+import com.kwetril.highload.model.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-class HighloadServerHandler extends SimpleChannelInboundHandler<Object> {
+class HighloadCupServerHandler extends SimpleChannelInboundHandler<Object> {
     private Object userLock = new Object();
     private Object locationLock = new Object();
     private Object visitLock = new Object();

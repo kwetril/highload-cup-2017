@@ -1,6 +1,6 @@
 package com.kwetril.highload.database;
 
-import com.kwetril.highload.request.*;
+import com.kwetril.highload.model.*;
 
 import java.util.ArrayList;
 
@@ -8,8 +8,6 @@ public interface IRepository {
     boolean addUser(UserData user);
 
     UserData getUser(int userId);
-
-    Iterable<Integer> getUserIds();
 
     int countUsers();
 
@@ -19,8 +17,6 @@ public interface IRepository {
 
     LocationData getLocation(int locationId);
 
-    Iterable<Integer> getLocationIds();
-
     int countLocations();
 
     boolean editLocation(LocationUpdate update);
@@ -28,8 +24,6 @@ public interface IRepository {
     boolean addVisit(VisitData visit);
 
     VisitData getVisit(int visitId);
-
-    Iterable<Integer> getVisitIds();
 
     int countVisits();
 

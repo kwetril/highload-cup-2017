@@ -1,4 +1,4 @@
-package com.kwetril.highload.request;
+package com.kwetril.highload.model;
 
 public class VisitUpdate extends VisitData {
     public boolean isUserUpdated = false;

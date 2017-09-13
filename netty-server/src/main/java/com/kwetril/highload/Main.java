@@ -3,18 +3,11 @@ package com.kwetril.highload;
 import com.kwetril.highload.database.RepositoryProvider;
 import com.kwetril.highload.database.TimestampProvider;
 import com.kwetril.highload.parsing.RequestParser;
-import com.kwetril.highload.request.LocationData;
-import com.kwetril.highload.request.UserData;
-import com.kwetril.highload.request.VisitData;
-import com.kwetril.highload.server.HigloadServer;
-import io.netty.handler.codec.http.DefaultFullHttpRequest;
-import io.netty.handler.codec.http.HttpMethod;
-import io.netty.handler.codec.http.HttpVersion;
+import com.kwetril.highload.model.LocationData;
+import com.kwetril.highload.model.UserData;
+import com.kwetril.highload.model.VisitData;
+import com.kwetril.highload.server.HigloadCupServer;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -146,7 +139,7 @@ public class Main {
         initDb();
         Thread serverThread = new Thread(() -> {
             try {
-                new HigloadServer(PORT).run();
+                new HigloadCupServer(PORT).run();
             } catch (Exception e) {
                 e.printStackTrace();
             }

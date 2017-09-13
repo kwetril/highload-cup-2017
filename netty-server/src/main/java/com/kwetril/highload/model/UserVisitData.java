@@ -1,4 +1,4 @@
-package com.kwetril.highload.request;
+package com.kwetril.highload.model;
 
 public class UserVisitData {
     public int mark;

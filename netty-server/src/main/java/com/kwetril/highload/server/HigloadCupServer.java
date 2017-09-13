@@ -15,10 +15,10 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 
-public class HigloadServer {
+public class HigloadCupServer {
     private int port;
 
-    public HigloadServer(int port) {
+    public HigloadCupServer(int port) {
         this.port = port;
     }
 
@@ -34,7 +34,6 @@ public class HigloadServer {
             bossGroup = new NioEventLoopGroup(1);
             workerGroup = new NioEventLoopGroup();
         }
-        //final EventExecutorGroup logicProcessor = new DefaultEventExecutorGroup(1);
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.option(ChannelOption.SO_BACKLOG, 1024);
@@ -52,10 +51,9 @@ public class HigloadServer {
                             .addLast("decoder", new HttpRequestDecoder(4096, 8192, 8192, false))
                             .addLast("aggregator", new HttpObjectAggregator(2 * 1024 * 1024))
                             .addLast("encoder", new HttpResponseEncoder())
-                            .addLast("handler", new HighloadServerHandler());
+                            .addLast("handler", new HighloadCupServerHandler());
                 }
             });
-            //.childOption(ChannelOption.SO_KEEPALIVE, true);
 
             // Bind and start to accept incoming connections.
             ChannelFuture f = b.bind(port).sync();
